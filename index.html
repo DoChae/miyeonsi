@@ -1,0 +1,4729 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#121626">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>온에어</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+/* =============================================================
+ *  온에어 — UI
+ * ============================================================= */
+:root {
+  --ink: #121626;
+  --ink-2: #1c2136;
+  --paper: #f7f2eb;
+  --paper-dim: #d9d3cb;
+  --blush: #eaa79f;
+  --blush-2: #f6d2c8;
+  --lilac: #b8a4e6;
+  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  --serif: 'Gowun Batang', 'Nanum Myeongjo', 'AppleMyungjo', serif;
+  --char-base: 90vh;
+  --tb-alpha: .84;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --ease: cubic-bezier(.22, .8, .24, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  background: #0a0c14;
+  color: var(--paper);
+  font-family: var(--font);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--blush); outline-offset: 3px; }
+#app { position: fixed; inset: 0; overflow: hidden; }
+
+.screen {
+  position: absolute; inset: 0;
+  opacity: 0; visibility: hidden;
+  transition: opacity .7s ease, visibility 0s linear .7s;
+}
+.screen.active { opacity: 1; visibility: visible; transition: opacity .7s ease; }
+
+/* ============================ TITLE ============================ */
+#title { overflow: hidden; }
+.title-bg {
+  position: absolute; inset: -4%;
+  background:
+    radial-gradient(80% 60% at 78% 18%, rgba(255, 230, 214, .55), transparent 60%),
+    radial-gradient(70% 50% at 12% 88%, rgba(184, 164, 230, .35), transparent 65%),
+    linear-gradient(172deg, #232946 0%, #4b4b72 34%, #a77f92 66%, #eeb3a4 88%, #f8dac8 100%);
+  background-size: cover; background-position: center;
+  animation: kenburns 28s ease-in-out infinite alternate;
+}
+.title-shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10, 12, 22, .1) 0%, rgba(10, 12, 22, .0) 40%, rgba(10, 12, 22, .55) 100%);
+}
+@keyframes kenburns { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.06) translate(-1.2%, -1%); } }
+
+.petals { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.petals i {
+  position: absolute; top: -20px;
+  background: radial-gradient(circle at 30% 30%, #fff 0%, #fde3e0 45%, #f3b7b2 100%);
+  border-radius: 80% 0 80% 0;
+  animation-name: fall, sway;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-direction: normal, alternate;
+}
+@keyframes fall { to { top: 105%; transform: rotate(540deg); } }
+@keyframes sway { from { margin-left: -24px; } to { margin-left: 28px; } }
+
+.vf {
+  position: absolute; pointer-events: none;
+  top: calc(18px + var(--safe-t)); bottom: calc(18px + var(--safe-b));
+  left: calc(18px + var(--safe-l)); right: calc(18px + var(--safe-r));
+}
+.vf i { position: absolute; width: 30px; height: 30px; border: 0 solid rgba(255, 255, 255, .78); }
+.vf .tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
+.vf .tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
+.vf .bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+.vf .br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+.vf .rec, .vf .tc, .vf .iso {
+  position: absolute; font: 600 11px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: .14em; color: rgba(255, 255, 255, .86);
+}
+.vf .rec { top: 14px; left: 44px; display: flex; align-items: center; gap: 7px; }
+.vf .rec .dot { width: 8px; height: 8px; border-radius: 50%; background: #ff5a5a; animation: blink 1.2s steps(2, start) infinite; }
+.vf .tc { top: 14px; right: 44px; }
+.vf .iso { bottom: 14px; right: 44px; opacity: .7; }
+@keyframes blink { to { visibility: hidden; } }
+
+.title-inner {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(620px, 86vw);
+  text-align: center;
+}
+.title-kicker {
+  font-size: 12px; letter-spacing: .5em; font-weight: 600;
+  color: rgba(255, 255, 255, .78); margin-bottom: 18px;
+  animation: rise 1.2s var(--ease) both .2s;
+}
+.title-logo {
+  font-family: var(--serif); font-weight: 700; line-height: 1.05;
+  display: flex; flex-direction: column; align-items: center;
+  text-shadow: 0 6px 40px rgba(30, 20, 50, .45);
+}
+.title-logo .l1 { font-size: clamp(30px, 4.6vw, 48px); color: var(--blush-2); font-weight: 400; animation: rise 1.2s var(--ease) both .35s; }
+.title-logo .l2 { font-size: clamp(44px, 8vw, 92px); letter-spacing: -.02em; animation: rise 1.4s var(--ease) both .5s; }
+.title-en {
+  margin-top: 14px; font-size: 11px; letter-spacing: .62em;
+  color: rgba(255, 255, 255, .62); animation: rise 1.2s var(--ease) both .7s;
+}
+.title-menu {
+  margin: clamp(34px, 7vh, 64px) auto 0; display: flex; flex-direction: column;
+  align-items: center; gap: 4px; animation: rise 1.2s var(--ease) both .9s;
+}
+.title-menu button {
+  position: relative; padding: 11px 26px;
+  font-size: 14px; font-weight: 600; letter-spacing: .32em; text-indent: .32em;
+  color: rgba(255, 255, 255, .88);
+  transition: color .3s, letter-spacing .4s var(--ease);
+}
+.title-menu button::before, .title-menu button::after {
+  content: ''; position: absolute; top: 50%; width: 0; height: 1px;
+  background: var(--blush-2); transition: width .4s var(--ease);
+}
+.title-menu button::before { right: 100%; }
+.title-menu button::after { left: 100%; }
+.title-menu button:hover:not(:disabled) { color: #fff; letter-spacing: .4em; }
+.title-menu button:hover:not(:disabled)::before, .title-menu button:hover:not(:disabled)::after { width: 28px; }
+.title-menu button:disabled { opacity: .32; cursor: default; }
+.title-foot {
+  position: absolute; left: 0; right: 0; bottom: calc(40px + var(--safe-b));
+  text-align: center; font-size: 11px; color: rgba(255, 255, 255, .55); letter-spacing: .02em; padding: 0 40px;
+}
+.title-endings { margin-top: 18px; font: 600 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .24em; color: rgba(255, 255, 255, .6); min-height: 11px; }
+.sound-hint {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: calc(66px + var(--safe-b));
+  white-space: nowrap;
+  padding: 7px 14px; border-radius: 999px;
+  font-size: 11.5px; letter-spacing: .04em; color: rgba(255, 255, 255, .78);
+  background: rgba(14, 17, 30, .35); border: 1px solid rgba(255, 255, 255, .18);
+  animation: pulse 2.4s ease-in-out infinite;
+  transition: opacity .6s;
+}
+.sound-hint.off { opacity: 0; pointer-events: none; }
+@keyframes rise { from { opacity: 0; transform: translateY(16px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* ============================ STAGE ============================ */
+#game { background: #000; }
+#stage { position: absolute; inset: 0; overflow: hidden; }
+.bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  opacity: 0; transition: opacity 1s ease;
+}
+.bg.show { opacity: 1; }
+.bg.instant { transition: none; }
+.bg-label {
+  position: absolute; right: calc(22px + var(--safe-r)); top: calc(22px + var(--safe-t));
+  text-align: right; pointer-events: none; max-width: 60%;
+}
+.bg-label b {
+  display: block; font-family: var(--serif); font-size: clamp(15px, 1.6vw, 20px);
+  color: rgba(255, 255, 255, .62); letter-spacing: .04em; font-weight: 700;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .25);
+}
+.bg-label span {
+  display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 6px;
+  font: 10px ui-monospace, Menlo, monospace; color: rgba(255, 255, 255, .7);
+  border: 1px dashed rgba(255, 255, 255, .4);
+}
+#vignette {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(5, 6, 14, .45) 100%);
+}
+
+/* ---------- characters ---------- */
+#chars { position: absolute; inset: 0; pointer-events: none; }
+.char {
+  position: absolute;
+  bottom: var(--by, 0px);
+  left: var(--x, 50%);
+  height: var(--h, var(--char-base));
+  transform: translateX(-50%) translate(var(--ex, 0px), var(--ey, 0px));
+  z-index: 2;
+  transition:
+    left .7s var(--ease),
+    transform .6s var(--ease),
+    opacity .55s ease,
+    filter .4s ease;
+  filter: drop-shadow(0 14px 34px rgba(0, 0, 0, .22));
+}
+.char.enter, .char.leave { opacity: 0; }
+.char.speaking { z-index: 4; }
+.char.dim { filter: brightness(.56) saturate(.72) drop-shadow(0 14px 34px rgba(0, 0, 0, .18)); }
+.char .bob { height: 100%; }
+.char .bob.hop { animation: hop .42s var(--ease); }
+.char .inner {
+  position: relative; height: 100%;
+  transform: translateX(var(--lean, 0px)) scaleX(var(--flip, 1));
+  transition: transform .5s var(--ease);
+}
+.char .face { display: block; height: 100%; width: auto; max-width: none; pointer-events: none; }
+.char .face.incoming { position: absolute; left: 0; top: 0; opacity: 0; transition: opacity .28s ease; }
+.char .face.incoming.in { opacity: 1; }
+#chars.instant .char, #chars.instant .char .inner { transition: none !important; }
+@keyframes hop { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(-3.2%); } 65% { transform: translateY(.4%); } }
+
+#stage.shake { animation: shake .45s; }
+@keyframes shake {
+  0%, 100% { transform: none; } 20% { transform: translate(-6px, 2px); } 40% { transform: translate(5px, -3px); }
+  60% { transform: translate(-4px, 1px); } 80% { transform: translate(3px, -1px); }
+}
+
+/* ---------- place banner ---------- */
+#place {
+  position: absolute; z-index: 15;
+  top: calc(20px + var(--safe-t)); left: calc(20px + var(--safe-l));
+  padding: 10px 18px 10px 16px;
+  border-left: 3px solid var(--blush);
+  background: linear-gradient(90deg, rgba(14, 17, 30, .72), rgba(14, 17, 30, .28));
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-radius: 0 10px 10px 0;
+  opacity: 0; transform: translateX(-14px);
+  transition: opacity .6s ease, transform .6s var(--ease);
+  pointer-events: none;
+}
+#place.on { opacity: 1; transform: none; }
+#place b { display: block; font-size: 15px; font-weight: 700; letter-spacing: .02em; }
+#place span { display: block; margin-top: 3px; font: 500 11px/1.3 ui-monospace, Menlo, monospace; letter-spacing: .06em; color: rgba(255, 255, 255, .7); }
+
+/* ============================ TEXTBOX ============================ */
+#textbox {
+  --c: var(--blush);
+  position: absolute; z-index: 20;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(16px + var(--safe-b));
+  width: min(1120px, calc(100% - 32px - var(--safe-l) - var(--safe-r)));
+  min-height: clamp(150px, 25vh, 214px);
+  padding: 34px 40px 26px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(26, 30, 50, calc(var(--tb-alpha) * .9)), rgba(14, 16, 28, var(--tb-alpha)));
+  backdrop-filter: blur(16px) saturate(1.25); -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, .1);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .07);
+  transition: opacity .35s ease, transform .35s var(--ease);
+  cursor: pointer;
+}
+#textbox::before {
+  content: ''; position: absolute; left: 24px; right: 24px; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--c), transparent);
+  opacity: .7;
+}
+#nameplate {
+  position: absolute; top: -19px; left: 28px;
+  padding: 8px 22px 8px 18px;
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 800; font-size: 15px; letter-spacing: .08em;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .25), inset 4px 0 0 var(--c);
+  transition: opacity .25s, transform .25s var(--ease);
+}
+#textbox.narr #nameplate { opacity: 0; transform: translateY(6px); }
+#textbox.msg #nameplate { background: #fff7d6; }
+#textbox.msg #nameplate span::before { content: '✉ '; }
+#text {
+  font-size: clamp(15.5px, .9vw + 9px, 20px);
+  line-height: 1.82;
+  letter-spacing: -.005em;
+  white-space: pre-line;
+  color: var(--paper);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+}
+#text .rest { visibility: hidden; }
+#textbox.narr #text { color: #ddd6e6; }
+#textbox.whisper #text { font-size: .94em; color: #c9c2d6; font-style: italic; }
+#textbox.msg #text { color: #fff4cf; }
+#next {
+  position: absolute; right: 30px; bottom: 20px;
+  width: 10px; height: 10px; opacity: 0;
+  border-right: 2px solid var(--c); border-bottom: 2px solid var(--c);
+  transform: rotate(45deg);
+  transition: opacity .2s;
+}
+#next.on { opacity: 1; animation: nudge 1s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: rotate(45deg) translate(3px, 3px); } }
+
+#quick {
+  position: absolute; top: 9px; right: 18px;
+  display: flex; gap: 2px;
+}
+#quick button {
+  padding: 5px 8px; border-radius: 6px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .14em;
+  color: rgba(255, 255, 255, .48);
+  transition: color .2s, background .2s;
+}
+#quick button:hover { color: #fff; background: rgba(255, 255, 255, .06); }
+#quick button.active { color: var(--ink); background: var(--blush-2); }
+#game.skipping #quick [data-q="skip"] { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+
+#game.ui-hidden #textbox, #game.ui-hidden #place { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(20px); }
+#game.ui-hidden #place { transform: none; }
+
+/* ============================ OVERLAYS ============================ */
+.overlay {
+  position: absolute; inset: 0; z-index: 30;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity .5s ease, visibility 0s linear .5s;
+}
+.overlay.on { opacity: 1; visibility: visible; transition: opacity .5s ease; }
+
+/* ---------- choices ---------- */
+#choices {
+  background: radial-gradient(70% 60% at 50% 45%, rgba(10, 12, 22, .35), rgba(10, 12, 22, .62));
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  padding: 20px 20px calc(clamp(150px, 25vh, 214px) + 40px);
+}
+.choice-prompt {
+  font-family: var(--serif); font-size: clamp(16px, 1.4vw + 6px, 21px);
+  color: #fff; margin-bottom: 20px; text-align: center;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, .5);
+  max-width: 640px;
+}
+.choice-prompt:empty { display: none; }
+.choice-list { width: min(580px, 100%); display: flex; flex-direction: column; gap: 12px; }
+.choice {
+  display: flex; align-items: center; gap: 16px;
+  width: 100%; padding: 16px 22px;
+  text-align: left; font-size: clamp(15px, .6vw + 11px, 17px); font-weight: 600; line-height: 1.45;
+  color: var(--ink);
+  background: rgba(250, 246, 240, .94);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .28), inset 0 0 0 1px rgba(255, 255, 255, .6);
+  opacity: 0; transform: translateY(12px);
+  animation: choiceIn .5s var(--ease) forwards;
+  transition: transform .25s var(--ease), background .25s, box-shadow .25s;
+}
+.choice em {
+  flex: 0 0 auto; font: 700 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .1em;
+  color: #c2756c; padding: 6px 7px; border-radius: 6px; background: rgba(234, 167, 159, .18);
+}
+@media (hover: hover) {
+  .choice:hover { transform: translateX(6px); background: #fff; box-shadow: 0 14px 34px rgba(0, 0, 0, .32), inset 4px 0 0 var(--blush); }
+}
+.choice:active { transform: scale(.985); }
+@keyframes choiceIn { to { opacity: 1; transform: none; } }
+
+/* ---------- chapter card ---------- */
+#card { background: #07080e; z-index: 50; text-align: center; padding: 30px; cursor: pointer; }
+.card-line { width: 1px; height: 0; background: var(--blush); margin-bottom: 24px; transition: height 1.2s var(--ease) .2s; }
+#card.on .card-line { height: 56px; }
+.card-kicker { font: 600 12px/1 ui-monospace, Menlo, monospace; letter-spacing: .5em; color: var(--blush); }
+.card-title { font-family: var(--serif); font-size: clamp(30px, 5vw, 52px); margin: 18px 0 14px; letter-spacing: .02em; }
+.card-sub:empty { display: none; }
+.card-sub { font-size: 14px; color: rgba(255, 255, 255, .6); letter-spacing: .08em; }
+#card > * { opacity: 0; transform: translateY(10px); transition: opacity 1s ease, transform 1s var(--ease); }
+#card.on > * { opacity: 1; transform: none; }
+#card.on .card-kicker { transition-delay: .35s; }
+#card.on .card-title { transition-delay: .55s; }
+#card.on .card-sub { transition-delay: .8s; }
+
+/* ---------- endcard ---------- */
+#endcard { background: rgba(7, 8, 14, .82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 45; padding: 20px; }
+.ec-panel { width: min(520px, 100%); text-align: center; }
+.ec-kicker { font: 600 12px/1 ui-monospace, Menlo, monospace; letter-spacing: .4em; color: var(--blush); }
+.ec-title { font-family: var(--serif); font-size: clamp(30px, 5vw, 44px); margin: 16px 0 18px; }
+.ec-text { font-family: var(--serif); font-size: 16px; line-height: 1.8; color: rgba(255, 255, 255, .86); white-space: pre-line; }
+.ec-stats { margin: 30px 0 22px; display: grid; gap: 14px; text-align: left; }
+.ec-next { font-size: 12px; letter-spacing: .06em; color: rgba(255, 255, 255, .5); margin-bottom: 26px; }
+.ec-btn {
+  padding: 13px 34px; border-radius: 999px; font-weight: 700; letter-spacing: .2em;
+  background: var(--paper); color: var(--ink);
+  transition: transform .2s var(--ease), box-shadow .2s;
+}
+.ec-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0, 0, 0, .35); }
+
+.stat { --c: var(--blush); padding: 14px 16px; border-radius: 14px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08); }
+.stat-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.stat-top b { font-size: 15px; }
+.stat-top span { font-size: 12px; color: var(--c); font-weight: 600; }
+.stat .bar { height: 6px; margin: 10px 0 8px; border-radius: 99px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+.stat .bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 60%, #fff), var(--c)); transition: width 1s var(--ease); }
+.stat small { font-size: 11px; color: rgba(255, 255, 255, .5); }
+
+#fade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .48s ease; z-index: 60; }
+#fade.on { opacity: 1; }
+#flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 59; }
+#flash.on { animation: flash .6s ease-out; }
+@keyframes flash { 0% { opacity: .85; } 100% { opacity: 0; } }
+
+/* ---------- toasts ---------- */
+#toasts {
+  position: absolute; z-index: 90; pointer-events: none;
+  top: calc(20px + var(--safe-t)); right: calc(20px + var(--safe-r));
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+}
+.toast {
+  --c: var(--blush);
+  padding: 9px 16px 9px 12px; border-radius: 999px;
+  background: rgba(14, 17, 30, .78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, .1);
+  font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+  animation: toastIn .45s var(--ease);
+  transition: opacity .5s, transform .5s;
+}
+.toast i { font-style: normal; color: var(--c); font-size: 14px; }
+.toast small { font-weight: 400; color: rgba(255, 255, 255, .7); font-size: 12px; }
+.toast.out { opacity: 0; transform: translateY(-8px); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(16px); } }
+
+/* ============================ MODAL ============================ */
+.modal {
+  position: absolute; inset: 0; z-index: 80;
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(16px + var(--safe-t)) 16px calc(16px + var(--safe-b));
+  background: rgba(6, 7, 12, .6);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s linear .3s;
+}
+.modal.on { opacity: 1; visibility: visible; transition: opacity .3s; }
+.modal-panel {
+  width: min(760px, 100%); max-height: 100%;
+  display: flex; flex-direction: column;
+  background: linear-gradient(180deg, #1e2338, #141828);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .55);
+  transform: translateY(14px) scale(.98); transition: transform .35s var(--ease);
+}
+.modal.on .modal-panel { transform: none; }
+.modal-panel header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 14px; border-bottom: 1px solid rgba(255, 255, 255, .07); }
+.modal-panel h3 { font: 700 13px/1 ui-monospace, Menlo, monospace; letter-spacing: .4em; color: var(--blush-2); }
+.modal-panel .x { width: 34px; height: 34px; border-radius: 50%; color: rgba(255, 255, 255, .6); transition: background .2s; }
+.modal-panel .x:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+.modal-body { padding: 18px 24px 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; user-select: text; -webkit-user-select: text; }
+.modal-body .empty-msg { color: rgba(255, 255, 255, .5); text-align: center; padding: 30px 0; }
+
+/* log */
+.modal.log .modal-panel { height: 86vh; }
+.log-line { --c: transparent; padding: 12px 0 12px 14px; border-left: 2px solid var(--c); margin-bottom: 4px; }
+.log-line b { display: block; font-size: 12px; letter-spacing: .1em; color: var(--c); margin-bottom: 4px; }
+.log-line p { font-size: 15px; line-height: 1.7; color: #ece6df; white-space: pre-line; }
+.log-line.narr { border-left-color: rgba(255, 255, 255, .12); }
+.log-line.narr p { color: #bdb6c8; }
+.log-line.whisper p { font-style: italic; }
+.log-choice { margin: 10px 0 14px; padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--blush-2); display: inline-block; }
+
+/* slots */
+.slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.slot {
+  display: flex; gap: 12px; padding: 10px; border-radius: 14px; text-align: left;
+  background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .08);
+  transition: background .2s, border-color .2s, transform .2s var(--ease);
+}
+.slot:hover { background: rgba(255, 255, 255, .08); border-color: rgba(234, 167, 159, .5); transform: translateY(-1px); }
+.slot.empty { opacity: .62; }
+.slot-thumb {
+  flex: 0 0 104px; height: 64px; border-radius: 9px; position: relative; overflow: hidden;
+  background-color: #2a2f45; background-size: cover; background-position: center;
+}
+.slot-thumb span {
+  position: absolute; left: 6px; top: 6px; padding: 3px 6px; border-radius: 5px;
+  font: 700 9.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .08em;
+  background: rgba(10, 12, 20, .7); color: #fff;
+}
+.slot-info { min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+.slot-info b { font-size: 12px; color: var(--blush-2); letter-spacing: .04em; }
+.slot-info p { font-size: 12.5px; color: #e4ded6; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.slot-info p.none { color: rgba(255, 255, 255, .45); }
+.slot-info time { font: 10.5px ui-monospace, Menlo, monospace; color: rgba(255, 255, 255, .45); }
+
+/* settings */
+.set-row { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 6px 18px; padding: 14px 0; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.set-row > span { font-size: 14px; font-weight: 600; }
+.set-row .hint { grid-column: 2; font-size: 11px; color: rgba(255, 255, 255, .45); font-style: normal; }
+.set-row input[type=range] { width: 100%; accent-color: var(--blush); height: 28px; }
+.set-row.toggle { grid-template-columns: 1fr auto; cursor: pointer; }
+.set-row.toggle input { display: none; }
+.set-row.toggle i { width: 44px; height: 26px; border-radius: 99px; background: rgba(255, 255, 255, .16); position: relative; transition: background .25s; }
+.set-row.toggle i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .25s var(--ease); }
+.set-row.toggle input:checked + i { background: var(--blush); }
+.set-row.toggle input:checked + i::after { transform: translateX(18px); }
+.set-note { margin-top: 18px; font-size: 12px; line-height: 1.7; color: rgba(255, 255, 255, .5); }
+
+/* menu & status */
+.menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.menu-grid button {
+  padding: 22px 10px; border-radius: 14px; display: flex; flex-direction: column; gap: 6px; align-items: center;
+  background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .08);
+  transition: background .2s, border-color .2s;
+}
+.menu-grid button:hover { background: rgba(255, 255, 255, .08); border-color: rgba(234, 167, 159, .5); }
+.menu-grid b { font: 700 12px/1 ui-monospace, Menlo, monospace; letter-spacing: .24em; color: var(--blush-2); }
+.menu-grid span { font-size: 12px; color: rgba(255, 255, 255, .6); }
+.status-ch { font: 600 12px/1 ui-monospace, Menlo, monospace; letter-spacing: .14em; color: rgba(255, 255, 255, .55); margin-bottom: 14px; }
+.stats { display: grid; gap: 12px; }
+
+/* confirm */
+.confirm {
+  position: absolute; inset: 0; z-index: 95; display: flex; align-items: center; justify-content: center;
+  background: rgba(6, 7, 12, .55); opacity: 0; visibility: hidden; transition: opacity .25s, visibility 0s linear .25s; padding: 20px;
+}
+.confirm.on { opacity: 1; visibility: visible; transition: opacity .25s; }
+.confirm-panel { width: min(360px, 100%); padding: 26px 24px 18px; border-radius: 18px; background: #1d2236; border: 1px solid rgba(255, 255, 255, .1); text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, .5); }
+.confirm-panel p { font-size: 15px; line-height: 1.6; white-space: pre-line; margin-bottom: 20px; }
+.confirm-btns { display: flex; gap: 8px; }
+.confirm-btns button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; background: rgba(255, 255, 255, .07); }
+.confirm-btns .yes { background: var(--blush); color: var(--ink); }
+
+/* ============================ MOBILE ============================ */
+body.m #textbox {
+  width: calc(100% - 20px - var(--safe-l) - var(--safe-r));
+  bottom: calc(10px + var(--safe-b));
+  min-height: 0; height: clamp(146px, 24vh, 184px);
+  padding: 34px 20px 18px;
+  border-radius: 18px;
+}
+body.m #nameplate { left: 16px; top: -16px; font-size: 13.5px; padding: 6px 16px 6px 14px; }
+body.m #text { font-size: 15.5px; line-height: 1.72; }
+body.m #quick { top: 6px; right: 8px; gap: 0; }
+body.m #quick button { padding: 5px 5px; font-size: 9.5px; letter-spacing: .08em; }
+body.m #next { right: 18px; bottom: 14px; }
+body.m #place { top: calc(12px + var(--safe-t)); left: calc(12px + var(--safe-l)); padding: 8px 14px 8px 12px; }
+body.m #place b { font-size: 13px; }
+body.m #toasts { top: calc(12px + var(--safe-t)); right: calc(12px + var(--safe-r)); }
+body.m .toast { font-size: 12px; padding: 7px 13px 7px 10px; }
+body.m #choices { padding: 16px 14px calc(clamp(146px, 24vh, 184px) + 28px); }
+body.m .choice { padding: 14px 16px; gap: 12px; }
+body.m .slots { grid-template-columns: 1fr; }
+body.m .menu-grid { grid-template-columns: repeat(2, 1fr); }
+body.m .set-row { grid-template-columns: 1fr; }
+body.m .set-row .hint { grid-column: 1; }
+body.m .set-row.toggle { grid-template-columns: 1fr auto; }
+body.m .modal-body { padding: 14px 18px 20px; }
+body.m .vf .iso { display: none; }
+body.m .sound-hint { bottom: calc(104px + var(--safe-b)); }
+
+/* 가로로 눕힌 휴대폰 (높이가 낮은 화면) */
+@media (max-height: 500px) and (orientation: landscape) {
+  #textbox { min-height: 0; height: 36vh; padding: 26px 26px 14px; bottom: calc(8px + var(--safe-b)); }
+  #text { font-size: 15px; line-height: 1.65; }
+  #choices { padding-bottom: calc(36vh + 20px); }
+  .choice { padding: 10px 16px; }
+  .choice-list { gap: 8px; }
+  .title-menu { margin-top: 18px; }
+  .title-menu button { padding: 7px 20px; }
+  .title-kicker { margin-bottom: 8px; }
+  .title-foot { bottom: calc(26px + var(--safe-b)); }
+}
+@media (max-width: 360px) {
+  body.m #quick button { font-size: 8.5px; padding: 5px 4px; letter-spacing: .04em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-bg, .petals i { animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= TITLE ================= -->
+  <section id="title" class="screen">
+    <div class="title-bg"></div>
+    <div class="title-shade"></div>
+    <div class="petals" aria-hidden="true"></div>
+    <div class="vf" aria-hidden="true">
+      <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+      <div class="rec"><span class="dot"></span>REC</div>
+      <div class="tc" id="timecode">00:00:00:00</div>
+      <div class="iso">ISO 400 · f/1.8 · 1/50</div>
+    </div>
+    <div class="title-inner">
+      <p class="title-kicker">A CAMPUS ROMANCE</p>
+      <h1 class="title-logo"><span class="l2">온에어</span></h1>
+      <p class="title-en">ON AIR</p>
+      <nav class="title-menu">
+        <button data-act="new">NEW GAME</button>
+        <button data-act="continue" id="btnContinue">CONTINUE</button>
+        <button data-act="load">LOAD</button>
+        <button data-act="settings">SETTINGS</button>
+      </nav>
+      <p class="title-endings" id="endingCount"></p>
+    </div>
+    <button class="sound-hint" id="soundHint">♪ 화면을 누르면 소리가 켜져요</button>
+    <p class="title-foot">이 작품에 등장하는 인물·단체·사건은 모두 허구입니다 · <span id="titleVersion">v0.4 · Prologue – Chapter 3</span></p>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="game" class="screen">
+    <div id="stage">
+      <div id="bgA" class="bg"><div class="bg-label"></div></div>
+      <div id="bgB" class="bg"><div class="bg-label"></div></div>
+      <div id="chars"></div>
+      <div id="vignette"></div>
+    </div>
+
+    <div id="place"><b></b><span></span></div>
+
+    <div id="textbox" class="narr">
+      <div id="nameplate"><span></span></div>
+      <div id="text"><span class="shown"></span><span class="rest"></span></div>
+      <div id="next" aria-hidden="true"></div>
+      <div id="quick">
+        <button data-q="auto">AUTO</button>
+        <button data-q="skip">SKIP</button>
+        <button data-q="log">LOG</button>
+        <button data-q="save">SAVE</button>
+        <button data-q="load">LOAD</button>
+        <button data-q="hide">HIDE</button>
+        <button data-q="menu">MENU</button>
+      </div>
+    </div>
+
+    <div id="choices" class="overlay">
+      <p class="choice-prompt"></p>
+      <div class="choice-list"></div>
+    </div>
+
+    <div id="card" class="overlay">
+      <div class="card-line"></div>
+      <p class="card-kicker"></p>
+      <h2 class="card-title"></h2>
+      <p class="card-sub"></p>
+    </div>
+
+    <div id="endcard" class="overlay">
+      <div class="ec-panel">
+        <p class="ec-kicker"></p>
+        <h2 class="ec-title"></h2>
+        <p class="ec-text"></p>
+        <div class="ec-stats"></div>
+        <p class="ec-next"></p>
+        <button class="ec-btn">타이틀로</button>
+      </div>
+    </div>
+
+    <div id="flash"></div>
+    <div id="fade"></div>
+  </section>
+
+  <!-- ================= MODALS ================= -->
+  <div id="modal" class="modal">
+    <div class="modal-panel">
+      <header><h3></h3><button class="x" aria-label="닫기">✕</button></header>
+      <div class="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="confirm" class="confirm">
+    <div class="confirm-panel">
+      <p></p>
+      <div class="confirm-btns"><button class="no">취소</button><button class="yes">확인</button></div>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+</div>
+
+<!-- 엔진 -->
+<script>/* ==== js/config.js ==== */
+/* =============================================================
+ *  GAME CONFIG — 사진을 넣은 뒤 크기·위치를 맞출 때는 이 파일만 고치면 됩니다.
+ * ============================================================= */
+
+window.GAME_CONFIG = {
+  title: '온에어',
+  subtitle: 'ON AIR',
+  version: 'v0.4 · Prologue – Chapter 3',
+  startLabel: 'prologue',
+  saveKey: 'springframe',      // localStorage 키 접두사
+  saveSlots: 9,                // 수동 저장 슬롯 수 (자동저장 슬롯은 별도)
+  imageFormats: ['png', 'webp'],      // 캐릭터 이미지 확장자 탐색 순서
+  bgFormats: ['jpg', 'webp', 'png'],  // 배경 이미지 확장자 탐색 순서
+  titleImage: 'assets/bg/title',
+  // 엔딩 목록 (타이틀 화면 수집 현황용). id 는 endcard({ id }) 와 같아야 함
+  endings: [
+    { id: 'jia_route_start', name: '나은 루트' },
+    { id: 'seoyeon_route_start', name: '채연 루트' },
+    { id: 'normal_end', name: '종강' },
+    { id: 'hidden_jia', name: '???', hidden: true },
+    { id: 'hidden_seoyeon', name: '???', hidden: true },
+  ],      // 타이틀 배경 (확장자 자동 탐색, 없으면 그라데이션)
+
+  // 캐릭터 기본 높이 (화면 높이 대비 비율)
+  layout: {
+    landscapeHeight: 0.95,   // PC·가로 화면
+    portraitHeight: 0.8,     // 세로 모바일 (대사창 위로 얼굴이 오도록)
+    portraitMaxWidthRatio: 1.9, // 세로 모바일에서 화면 너비 × 이 값을 넘지 않음
+  },
+};
+
+/* 표정 이름 → 플레이스홀더/로그에 쓰는 한글 라벨 */
+window.FACE_LABELS = {
+  normal: '기본', smile: '웃음', surprised: '놀람', shy: '부끄러움',
+  annoyed: '뾰로통', serious: '진지', sad: '슬픔',
+};
+
+/* =============================================================
+ *  CHARACTERS
+ *  folder      : 이미지 폴더. <folder>/<표정>.png 를 찾음
+ *  faces       : 사용하는 표정 목록 (미리 불러오기용)
+ *                → 파일이 없으면 normal 이미지, 그것도 없으면 플레이스홀더
+ *  scale       : 기본 높이 대비 배율 (1 = 기본)
+ *  offsetX     : 좌우 미세 조정 (화면 너비 %, + 오른쪽)
+ *  offsetY     : 상하 미세 조정 (캐릭터 높이 %, + 아래로)
+ *  mobile      : 모바일(세로/좁은 화면)에서만 덮어쓸 값
+ *  faceAdjust  : 표정 사진마다 크롭이 다를 때 표정별 보정 { smile: { scale, offsetX, offsetY } }
+ *  lookDir     : 원본 사진의 시선 방향 'front' | 'left' | 'right'
+ *                left/right로 지정하면 대화 상대 쪽을 보도록 자동 좌우 반전
+ *  allowFlip   : false면 절대 반전하지 않음 (글씨 있는 옷 등)
+ *  lean        : 대화 상대 쪽으로 기울이는 거리(px)
+ *  heroine     : 호감도를 가지는 공략 캐릭터
+ *  noSprite    : 이름만 나오고 스탠딩이 없는 조연
+ * ============================================================= */
+window.CHARACTERS = {
+  yujin: {
+    name: '도연', fullName: '김도연', color: '#8fb6e6',
+    role: '건축학과 2학년 · 21세 · YSBS 수습 기술부',
+    folder: 'assets/characters/yujin',
+    faces: ['normal', 'smile', 'surprised', 'shy', 'annoyed', 'serious', 'sad'],
+    scale: 1, offsetX: 0, offsetY: 0,
+    mobile: { scale: 1, offsetX: 0, offsetY: 0 },
+    faceAdjust: {},
+    lookDir: 'front', allowFlip: true, lean: 10,
+    placeholder: { hair: 'bob' },
+  },
+  jia: {
+    name: '나은', fullName: '이나은', color: '#f2a7a0',
+    role: '건축학과 2학년 · 21세 · 8년지기',
+    folder: 'assets/characters/jia',
+    faces: ['normal', 'smile', 'surprised', 'shy', 'annoyed', 'serious', 'sad'],
+    scale: 0.98, offsetX: 0, offsetY: 0,
+    mobile: { scale: 0.98, offsetX: 0, offsetY: 0 },
+    faceAdjust: {},
+    lookDir: 'front', allowFlip: true, lean: 10,
+    heroine: true, startAffection: 30,
+    stages: [[0, '어색한 사이'], [20, '오래된 친구'], [40, '제일 편한 사람'], [60, '자꾸 신경 쓰이는 사람'], [80, '특별한 사람']],
+    placeholder: { hair: 'long' },
+  },
+  seoyeon: {
+    name: '채연', fullName: '정채연', color: '#b8a4e6',
+    role: '국어국문학과 4학년 · 23세 · YSBS 아나운서부 부장',
+    folder: 'assets/characters/seoyeon',
+    faces: ['normal', 'smile', 'surprised', 'shy', 'annoyed', 'serious', 'sad'],
+    scale: 1.02, offsetX: 0, offsetY: 0,
+    mobile: { scale: 1.02, offsetX: 0, offsetY: 0 },
+    faceAdjust: {},
+    lookDir: 'front', allowFlip: true, lean: 10,
+    heroine: true, startAffection: 0,
+    stages: [[0, '모르는 신입'], [5, '눈에 띄는 신입'], [12, '신경 쓰이는 후배'], [25, '믿을 만한 사람'], [50, '곁에 두고 싶은 사람'], [80, '특별한 사람']],
+    placeholder: { hair: 'straight' },
+  },
+  gwadae: {
+    name: '과대 언니', fullName: '과대 언니', color: '#f0c27b',
+    role: '건축학과 과대 · 3학년', noSprite: true,
+  },
+  minhyuk: {
+    name: '민혁', fullName: '윤민혁', color: '#9fd0ad',
+    role: 'YSBS 국장 · 4학년 · 25세 (복학생)', noSprite: true,
+  },
+  rookie: {
+    name: '신입 아나운서', fullName: '신입 아나운서', color: '#d6c7a1',
+    role: '히든 엔딩 「7시 뉴스」 · YSBS 신입', noSprite: true,
+  },
+};
+
+/* =============================================================
+ *  POSITIONS — x: PC 기준 화면 %, mx: 모바일 기준 화면 %
+ *  두 사람 대화는 midleft / midright 를 쓰면 자연스럽게 마주 봄
+ * ============================================================= */
+window.POSITIONS = {
+  left:     { x: 20, mx: 19 },
+  midleft:  { x: 34, mx: 30 },
+  center:   { x: 50, mx: 50 },
+  midright: { x: 66, mx: 70 },
+  right:    { x: 80, mx: 81 },
+};
+
+/* =============================================================
+ *  BACKGROUNDS — assets/bg/<id>.jpg (없으면 그라데이션 플레이스홀더)
+ *  focus: 세로 화면에서 잘릴 때 보여 줄 중심 (CSS background-position)
+ * ============================================================= */
+window.BACKGROUNDS = {
+  campus_gate:     { name: '연서대 정문 · 아침',        ph: ['#f6dcc8', '#aac0de'], focus: '50% 50%' },
+  campus_path:     { name: '중앙 산책로',            ph: ['#eef2e2', '#9fbcae'], focus: '50% 50%' },
+  rooftop:         { name: '학생회관 옥상 · 아침',   ph: ['#d4e4f2', '#f3e1d1'], focus: '50% 50%' },
+  rooftop_dawn:    { name: '학생회관 옥상 · 새벽',   ph: ['#283154', '#e0a093'], focus: '50% 50%' },
+  hall_room:       { name: '학생회관 204호',         ph: ['#efe8de', '#c3b9ab'], focus: '50% 50%' },
+  bench:           { name: '학생회관 앞 벤치 · 저녁', ph: ['#f4b18e', '#666490'], focus: '50% 50%' },
+  club_room:       { name: 'YSBS 방송국',               ph: ['#dccdb8', '#76695c'], focus: '50% 50%' },
+  club_room_night: { name: 'YSBS 주조정실',          ph: ['#151b30', '#3d4166'], focus: '50% 50%' },
+  cafeteria:       { name: '학생식당',               ph: ['#f8f0e2', '#cdbb9e'], focus: '50% 50%' },
+  flower_path:     { name: '인문관 뒤 목련길',       ph: ['#fdf5f3', '#bfd2b9'], focus: '50% 50%' },
+  dawn_campus:     { name: '대운동장 · 새벽',        ph: ['#1e2646', '#c88a85'], focus: '50% 50%' },
+  campus_cafe:     { name: '학교 앞 카페',            ph: ['#efe0cf', '#9b7f68'], focus: '50% 50%' },
+  pub:             { name: '학교 앞 호프집',          ph: ['#f3c48e', '#7a3f2e'], focus: '50% 50%' },
+  design_studio:   { name: '건축관 4층 설계실',       ph: ['#2a3046', '#8a8f9e'], focus: '50% 50%' },
+  cherry_path:     { name: '벚꽃길 · 밤',             ph: ['#2b2340', '#f2b8c6'], focus: '50% 50%' },
+  booth:           { name: 'YSBS 녹음 부스',          ph: ['#1a1d2c', '#5b4f73'], focus: '50% 50%' },
+  festival_booth:  { name: '대동제 · 중계 부스',       ph: ['#1d2140', '#e08a5f'], focus: '50% 50%' },
+  festival_stage:  { name: '대동제 · 대운동장 밤',     ph: ['#141833', '#c4568a'], focus: '50% 50%' },
+  snack_bar:       { name: '학교 앞 분식집',         ph: ['#f5c99d', '#bb5e4c'], focus: '50% 50%' },
+  jia_room:        { name: '나은의 방 · 밤',         ph: ['#1b1e34', '#5a4a6e'], focus: '50% 50%' },
+};
+
+</script>
+<script>/* ==== js/audio.js ==== */
+/* =============================================================
+ *  AUDIO — BGM · 효과음
+ *
+ *  음원 파일 없이도 브라우저 안에서 직접 연주되는 내장 BGM/효과음입니다.
+ *  직접 고른 음원을 쓰고 싶으면 아래 AUDIO_FILES 에 경로를 적어 주세요.
+ *  파일이 있으면 그 파일을, 없거나 못 불러오면 내장 사운드를 씁니다.
+ *
+ *  스토리에서:  bgm('daily')  bgm(null)  sfx('onair')
+ * ============================================================= */
+window.AUDIO_FILES = {
+  bgm: {
+    // title: 'assets/audio/bgm/title.mp3',
+    // daily: 'assets/audio/bgm/daily.mp3',
+    // heart: 'assets/audio/bgm/heart.mp3',
+    // night: 'assets/audio/bgm/night.mp3',
+  },
+  sfx: {
+    // select: 'assets/audio/sfx/select.mp3',
+  },
+};
+
+(function () {
+  'use strict';
+
+  const AC = window.AudioContext || window.webkitAudioContext;
+  let ctx = null, master, bgmBus, sfxBus, verb;
+  let vol = { bgm: 0.55, sfx: 0.7 };
+  const BOOST = { bgm: 2.4, sfx: 2.2 };   // 내장 사운드 음량 보정
+  let current = null;          // { id, stop() }
+  let wanted = null;           // 재생해야 할 BGM id (잠금 해제 전에도 기억)
+  let unlocked = false;
+
+  /* ---------- 기본 세팅 ---------- */
+  function init() {
+    if (ctx || !AC) return;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+    bgmBus = ctx.createGain(); bgmBus.gain.value = vol.bgm * BOOST.bgm; bgmBus.connect(master);
+    sfxBus = ctx.createGain(); sfxBus.gain.value = vol.sfx * BOOST.sfx; sfxBus.connect(master);
+    verb = makeReverb(2.6);
+    const vg = ctx.createGain(); vg.gain.value = 0.32;
+    verb.connect(vg); vg.connect(master);
+  }
+
+  function makeReverb(sec) {
+    const len = Math.floor(ctx.sampleRate * sec);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.4);
+    }
+    const cv = ctx.createConvolver(); cv.buffer = buf; return cv;
+  }
+
+  let noiseBuf = null;
+  function noise() {
+    if (!noiseBuf) {
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf; return s;
+  }
+
+  const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
+
+  /* ---------- 악기 ---------- */
+  // 전자피아노
+  function ep(dest, t, m, dur, v = 0.2, wet = 0.4) {
+    const f = mtof(m);
+    const g = ctx.createGain();
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.008);
+    g.gain.exponentialRampToValueAtTime(v * 0.35, t + 0.25);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(0.4, dur) + 0.6);
+    [[1, 1], [2, 0.22], [3.01, 0.06]].forEach(([mul, amp]) => {
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f * mul;
+      const og = ctx.createGain(); og.gain.value = amp;
+      o.connect(og); og.connect(lp);
+      o.start(t); o.stop(t + dur + 0.8);
+    });
+    lp.connect(g); g.connect(dest);
+    if (wet) { const w = ctx.createGain(); w.gain.value = wet; g.connect(w); w.connect(verb); }
+  }
+
+  // 오르골
+  function bell(dest, t, m, v = 0.12, wet = 0.6, len = 1.6) {
+    const f = mtof(m);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    [[1, 1], [2.756, 0.18], [5.404, 0.07]].forEach(([mul, amp]) => {
+      if (f * mul > 16000) return;
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f * mul;
+      const og = ctx.createGain(); og.gain.value = amp;
+      o.connect(og); og.connect(g);
+      o.start(t); o.stop(t + len + 0.05);
+    });
+    g.connect(dest);
+    if (wet) { const w = ctx.createGain(); w.gain.value = wet; g.connect(w); w.connect(verb); }
+  }
+
+  // 패드
+  function pad(dest, t, notes, dur, v = 0.05) {
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1100; lp.Q.value = 0.3;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + Math.min(1.2, dur * 0.4));
+    g.gain.setValueAtTime(v, t + dur * 0.8);
+    g.gain.linearRampToValueAtTime(0.0001, t + dur + 0.6);
+    notes.forEach((m) => [-6, 6].forEach((det) => {
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det;
+      o.connect(lp); o.start(t); o.stop(t + dur + 0.7);
+    }));
+    lp.connect(g); g.connect(dest);
+    const w = ctx.createGain(); w.gain.value = 0.5; g.connect(w); w.connect(verb);
+  }
+
+  function bass(dest, t, m, dur, v = 0.16) {
+    const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = mtof(m);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + 0.05);
+  }
+
+  function hat(dest, t, v = 0.03) {
+    const s = noise();
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7000;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    s.connect(hp); hp.connect(g); g.connect(dest); s.start(t, Math.random()); s.stop(t + 0.06);
+  }
+
+  function kick(dest, t, v = 0.22) {
+    const o = ctx.createOscillator(); o.type = 'sine';
+    o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.25);
+  }
+
+  /* ---------- 내장 BGM ----------
+   * 코드 진행(MIDI) + 패턴. 8분음표 단위로 연주
+   */
+  const C = (root, ...iv) => [root, ...iv.map((x) => root + x)];
+  const TRACKS = {
+    // 타이틀 — 오르골 + 패드, 몽글몽글
+    title: {
+      bpm: 76, steps: 8,
+      chords: [C(53, 4, 7, 11), C(52, 3, 7, 10), C(50, 3, 7, 10), C(48, 4, 7, 11)],
+      mel: [[0, 3, 2], [4, 1], [], [6, 2, 1], [0, 2, 1], [4, 3], [], [7, 4]],
+      play(dest, t, bar, step, ch, beat) {
+        if (step === 0) pad(dest, t, ch.map((m) => m + 12), beat * 8, 0.035);
+        if (step === 0) bass(dest, t, ch[0] - 12, beat * 6, 0.1);
+        const arp = [0, 1, 2, 3, 2, 1, 2, 3];
+        bell(dest, t, ch[arp[step]] + 24, 0.05, 0.6, 1.2);
+        const mm = this.mel[(bar % 2) * 4 + Math.floor(step / 2)];
+        if (step % 2 === 0 && mm && mm.length) bell(dest, t, ch[mm[0] % 4] + 24 + (mm[0] > 3 ? 12 : 0), 0.08, 0.7, 2.2);
+      },
+    },
+    // 일상 — 가벼운 로파이 피아노
+    daily: {
+      bpm: 92, steps: 8,
+      chords: [C(48, 4, 7, 11), C(47, 3, 8, 10), C(45, 3, 7, 10), C(53, 4, 7, 11)],
+      play(dest, t, bar, step, ch, beat) {
+        if (step === 0 || step === 5) kick(dest, t, 0.14);
+        if (step % 2 === 1) hat(dest, t, 0.018); else hat(dest, t, 0.01);
+        if (step === 0) bass(dest, t, ch[0] - 12, beat * 1.8, 0.14);
+        if (step === 3) bass(dest, t, ch[0] - 12 + 7, beat * 0.9, 0.1);
+        if (step === 6) bass(dest, t, ch[0] - 12, beat * 0.9, 0.1);
+        if (step === 2 || step === 6) ch.slice(1).forEach((m) => ep(dest, t, m + 12, beat * 1.2, 0.05, 0.25));
+        const melody = [
+          [76, null, 74, 72, null, 74, 76, null],
+          [74, null, 72, 71, null, 72, 74, null],
+          [72, null, 74, 76, null, 79, 76, null],
+          [77, null, 76, 74, null, null, 72, null],
+        ];
+        if (bar % 8 >= 4) {
+          const n = melody[bar % 4][step];
+          if (n) ep(dest, t, n, beat * 0.9, 0.07, 0.35);
+        }
+      },
+    },
+    // 설렘 — 아르페지오 피아노 + 오르골
+    heart: {
+      bpm: 82, steps: 8,
+      chords: [C(53, 4, 7, 11), C(55, 4, 7, 9), C(52, 3, 7, 10), C(45, 3, 7, 10)],
+      play(dest, t, bar, step, ch, beat) {
+        if (step === 0) { bass(dest, t, ch[0] - 12, beat * 3.8, 0.12); pad(dest, t, ch, beat * 8, 0.025); }
+        const arp = [0, 2, 3, 1, 2, 3, 1, 2];
+        ep(dest, t, ch[arp[step]] + 12, beat * 0.9, 0.06, 0.4);
+        const mel = [[79, 0], [81, 3], [79, 6], [76, 0], [77, 3], [76, 6], [72, 0], [74, 4]];
+        mel.forEach(([n, s], i) => { if (Math.floor(i / 2) === bar % 4 && s === step) bell(dest, t, n, 0.06, 0.7, 2); });
+      },
+    },
+    // 밤 — 느린 패드 + 띄엄띄엄 피아노
+    night: {
+      bpm: 64, steps: 8,
+      chords: [C(45, 3, 7, 10, 14), C(41, 4, 7, 11), C(48, 4, 7, 11), C(43, 4, 7, 9)],
+      play(dest, t, bar, step, ch, beat) {
+        if (step === 0) { pad(dest, t, ch.slice(1, 4).map((m) => m + 12), beat * 8, 0.04); bass(dest, t, ch[0] - 12, beat * 7, 0.09); }
+        if (step === 0 || step === 3 || step === 6) ep(dest, t, ch[(step / 3 + bar) % ch.length] + 24, beat * 2, 0.05, 0.6);
+        if (step === 4 && bar % 2) bell(dest, t, ch[2] + 36, 0.03, 0.8, 2.5);
+      },
+    },
+  };
+
+  function playSynth(id) {
+    const tr = TRACKS[id];
+    if (!tr) return null;
+    const out = ctx.createGain();
+    out.gain.setValueAtTime(0.0001, ctx.currentTime);
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 1.4);
+    out.connect(bgmBus);
+    const beat = 60 / tr.bpm / 2;        // 8분음표 길이
+    let next = ctx.currentTime + 0.12, step = 0, bar = 0, alive = true;
+    const timer = setInterval(() => {
+      if (!alive) return;
+      while (next < ctx.currentTime + 0.25) {
+        const ch = tr.chords[bar % tr.chords.length];
+        try { tr.play(out, next, bar, step, ch, beat); } catch (e) { console.warn(e); }
+        next += beat;
+        if (++step >= tr.steps) { step = 0; bar++; }
+      }
+    }, 40);
+    return {
+      id,
+      stop(fade = 1.2) {
+        alive = false; clearInterval(timer);
+        const n = ctx.currentTime;
+        out.gain.cancelScheduledValues(n);
+        out.gain.setValueAtTime(out.gain.value, n);
+        out.gain.linearRampToValueAtTime(0.0001, n + fade);
+        setTimeout(() => out.disconnect(), (fade + 2) * 1000);
+      },
+    };
+  }
+
+  function playFile(id, url) {
+    const el = new Audio(url);
+    el.loop = true; el.volume = 0;
+    let alive = true, failed = false;
+    const target = () => vol.bgm;
+    el.addEventListener('error', () => {
+      failed = true;
+      if (alive && current && current.id === id) { current = playSynth(id); }
+    });
+    el.play().catch(() => {});
+    let v = 0;
+    const fadeIn = setInterval(() => { v = Math.min(target(), v + 0.04); el.volume = v; if (v >= target()) clearInterval(fadeIn); }, 50);
+    return {
+      id, el,
+      stop() {
+        alive = false; clearInterval(fadeIn);
+        if (failed) return;
+        const fo = setInterval(() => { el.volume = Math.max(0, el.volume - 0.05); if (el.volume <= 0) { clearInterval(fo); el.pause(); } }, 50);
+      },
+    };
+  }
+
+  function startBgm(id) {
+    if (current && current.id === id) return;
+    if (current) { current.stop(); current = null; }
+    if (!id || !ctx) return;
+    const file = window.AUDIO_FILES.bgm[id];
+    current = file ? playFile(id, file) : playSynth(id);
+  }
+
+  /* ---------- 효과음 ---------- */
+  const SFX = {
+    next(t) { // 대사 넘김
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(1500, t); o.frequency.exponentialRampToValueAtTime(900, t + 0.04);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+      o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + 0.07);
+    },
+    hover(t) { bell(sfxBus, t, 93, 0.025, 0.1, 0.25); },
+    choice(t) { bell(sfxBus, t, 88, 0.07, 0.5, 1.2); bell(sfxBus, t + 0.09, 95, 0.06, 0.5, 1.4); },
+    select(t) { [84, 88, 91, 96].forEach((m, i) => bell(sfxBus, t + i * 0.055, m, 0.08, 0.5, 1)); },
+    scene(t) {
+      const s = noise();
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.8;
+      bp.frequency.setValueAtTime(400, t); bp.frequency.exponentialRampToValueAtTime(2400, t + 0.5);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.16, t + 0.2); g.gain.linearRampToValueAtTime(0.0001, t + 0.6);
+      s.connect(bp); bp.connect(g); g.connect(sfxBus); s.start(t); s.stop(t + 0.65);
+    },
+    card(t) { [72, 76, 79, 83].forEach((m) => bell(sfxBus, t, m, 0.05, 0.8, 3)); bell(sfxBus, t + 0.3, 88, 0.05, 0.8, 3); },
+    aff(t) { [91, 95, 98, 103].forEach((m, i) => bell(sfxBus, t + i * 0.04, m, 0.04, 0.6, 0.8)); },
+    save(t) { bell(sfxBus, t, 86, 0.08, 0.4, 0.8); bell(sfxBus, t + 0.1, 93, 0.08, 0.4, 1); },
+    open(t) {
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(500, t); o.frequency.exponentialRampToValueAtTime(900, t + 0.06);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+      o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + 0.12);
+    },
+    msg(t) { bell(sfxBus, t, 88, 0.07, 0.2, 0.4); bell(sfxBus, t + 0.12, 91, 0.07, 0.2, 0.6); },
+    onair(t) { [77, 81, 84, 89].forEach((m, i) => ep(sfxBus, t + i * 0.32, m, 0.9, 0.12, 0.5)); },
+    hop(t) {
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(600, t); o.frequency.exponentialRampToValueAtTime(1200, t + 0.08);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + 0.13);
+    },
+  };
+
+  const sfxCache = {};
+  function sfx(name) {
+    if (!ctx || !unlocked || vol.sfx <= 0) return;
+    const file = window.AUDIO_FILES.sfx[name];
+    if (file && sfxCache[name] !== false) {
+      const a = sfxCache[name] || (sfxCache[name] = new Audio(file));
+      a.addEventListener('error', () => { sfxCache[name] = false; }, { once: true });
+      try { a.currentTime = 0; a.volume = vol.sfx; a.play().catch(() => {}); return; } catch { /* fall through */ }
+    }
+    const fn = SFX[name];
+    if (fn) try { fn(ctx.currentTime + 0.01); } catch (e) { console.warn(e); }
+  }
+
+  /* ---------- 공개 API ---------- */
+  window.SOUND = {
+    unlock() {
+      if (!AC) return;
+      init();
+      if (ctx.state === 'suspended') ctx.resume();
+      if (!unlocked) { unlocked = true; if (wanted) startBgm(wanted); }
+    },
+    bgm(id) { wanted = id || null; if (unlocked) startBgm(wanted); },
+    get bgmId() { return wanted; },
+    sfx,
+    setVolume(kind, v) {
+      vol[kind] = v;
+      if (!ctx) return;
+      if (kind === 'bgm') { bgmBus.gain.value = v * BOOST.bgm; if (current && current.el) current.el.volume = v; }
+      if (kind === 'sfx') sfxBus.gain.value = v * BOOST.sfx;
+    },
+    tracks: Object.keys(TRACKS),
+    /** 개발용: 곡/효과음을 오프라인으로 렌더링해서 { peak, rms } 반환 */
+    async _probe(kind, id, sec = 8) {
+      const saved = [ctx, master, bgmBus, sfxBus, verb, noiseBuf, unlocked];
+      ctx = new OfflineAudioContext(2, 44100 * sec, 44100);
+      noiseBuf = null;
+      master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+      bgmBus = ctx.createGain(); bgmBus.gain.value = vol.bgm * BOOST.bgm; bgmBus.connect(master);
+      sfxBus = ctx.createGain(); sfxBus.gain.value = vol.sfx * BOOST.sfx; sfxBus.connect(master);
+      verb = makeReverb(2.6); const vg = ctx.createGain(); vg.gain.value = 0.32; verb.connect(vg); vg.connect(master);
+      if (kind === 'bgm') {
+        const tr = TRACKS[id]; const beat = 60 / tr.bpm / 2;
+        let t = 0.05, step = 0, bar = 0;
+        while (t < sec - 0.5) { tr.play(bgmBus, t, bar, step, tr.chords[bar % tr.chords.length], beat); t += beat; if (++step >= tr.steps) { step = 0; bar++; } }
+      } else { SFX[id](0.05); }
+      const buf = await ctx.startRendering();
+      [ctx, master, bgmBus, sfxBus, verb, noiseBuf, unlocked] = saved;
+      const d = buf.getChannelData(0); let peak = 0, sum = 0;
+      for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i]); if (v > peak) peak = v; sum += d[i] * d[i]; }
+      return { peak: +peak.toFixed(3), rms: +Math.sqrt(sum / d.length).toFixed(4) };
+    },
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (!ctx) return;
+    if (document.hidden) ctx.suspend(); else if (unlocked) ctx.resume();
+  });
+})();
+
+</script>
+<script>/* ==== js/engine.js ==== */
+/* =============================================================
+ *  VN ENGINE
+ *  스토리 내용은 하나도 들어 있지 않은 범용 엔진입니다.
+ *  스토리는 js/story/*.js 에서 VN.label(이름, [명령...]) 으로 등록합니다.
+ * ============================================================= */
+(function () {
+  'use strict';
+
+  const CFG = window.GAME_CONFIG;
+  const CHARS = window.CHARACTERS;
+  const BGS = window.BACKGROUNDS;
+  const POS = window.POSITIONS;
+  const FACE_LABEL = window.FACE_LABELS || {};
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const BLOCK = 'BLOCK';
+  const JUMPED = 'JUMPED';
+
+  /* ===========================================================
+   *  1. 스토리 등록 & 컴파일
+   *  when()/choice()의 중첩 블록을 하위 라벨로 펼쳐서
+   *  세이브 데이터가 "라벨 + 인덱스"만으로 위치를 기억할 수 있게 함
+   * =========================================================== */
+  const LABELS = {};
+
+  function compile(name, list) {
+    if (!Array.isArray(list)) throw new Error(`[${name}] 명령 목록은 배열이어야 합니다`);
+    return list.map((c, i) => {
+      if (!c || typeof c !== 'object') throw new Error(`[${name}] ${i}번째 명령이 비어 있어요 (쉼표를 확인하세요)`);
+      if ('if' in c) {
+        const t = `${name}/${i}/then`;
+        defineLabel(t, [...(c.then || []), { ret: true }]);
+        let e = null;
+        if (c.else && c.else.length) {
+          e = `${name}/${i}/else`;
+          defineLabel(e, [...c.else, { ret: true }]);
+        }
+        return { type: 'if', cond: c.if, t, e };
+      }
+      if (c.type === 'choice') {
+        return {
+          ...c,
+          choice: c.choice.map((o, k) => {
+            const opt = { ...o, sub: null };
+            if (o.then && o.then.length) {
+              opt.sub = `${name}/${i}/opt${k}`;
+              defineLabel(opt.sub, [...o.then, o.jump ? { type: 'jump', to: o.jump } : { ret: true }]);
+              opt.jump = null;
+            }
+            delete opt.then;
+            return opt;
+          }),
+        };
+      }
+      return c;
+    });
+  }
+
+  function defineLabel(name, list) {
+    if (LABELS[name]) console.warn(`[VN] 라벨 "${name}"이(가) 다시 정의되었습니다`);
+    LABELS[name] = compile(name, list);
+  }
+
+  /* ===========================================================
+   *  2. 스토리 작성용 DSL
+   * =========================================================== */
+  const dsl = {
+    /** 대사. face는 null이면 표정 유지. opts: {hop, whisper, msg, as} */
+    say: (who, face, text, opts = {}) => ({ type: 'say', who, face, text, ...opts }),
+    /** 내레이션 */
+    narr: (text, opts = {}) => ({ type: 'say', who: null, text, ...opts }),
+    /** 등장. opts: {from:'left'|'right', look:'left'|'right'|'front'} */
+    show: (who, pos = 'center', face = 'normal', opts = {}) => ({ type: 'show', who, pos, face, ...opts }),
+    hide: (who) => ({ type: 'hide', who }),
+    hideAll: () => ({ type: 'hideAll' }),
+    move: (who, pos) => ({ type: 'move', who, pos }),
+    face: (who, face) => ({ type: 'face', who, face }),
+    look: (who, dir) => ({ type: 'look', who, dir }),
+    /** 배경 전환. fade: 'cross' | 'black' | 'none'.  black은 기본적으로 인물도 정리 (opts.keep으로 유지) */
+    bg: (id, fade = 'cross', opts = {}) => ({ type: 'bg', id, fade, ...opts }),
+    place: (where, when) => ({ type: 'place', where, when }),
+    chapter: (kicker, title, sub) => ({ type: 'chapter', kicker, title, sub }),
+    /** 선택지. options: [{text, aff, set, then, jump, if}] */
+    choice: (prompt, options) => ({ type: 'choice', prompt, choice: options }),
+    /** 조건 분기 */
+    when: (cond, then, otherwise) => ({ if: cond, then, else: otherwise }),
+    aff: (o) => ({ type: 'aff', o }),
+    set: (o) => ({ type: 'set', o }),
+    jump: (to) => ({ type: 'jump', to }),
+    wait: (ms) => ({ type: 'wait', ms }),
+    fx: (name, who) => ({ type: 'fx', name, who }),
+    endcard: (o) => ({ type: 'endcard', ...o }),
+    call: (fn) => ({ type: 'call', fn }),
+    /** 배경음악. id: 'title' | 'daily' | 'heart' | 'night' | null(정지) */
+    bgm: (id) => ({ type: 'bgm', id }),
+    /** 효과음. 'onair' 'msg' 'hop' 'choice' 'select' 'scene' 'card' 'aff' 'save' */
+    sfx: (name) => ({ type: 'sfx', name }),
+  };
+
+  const SND = window.SOUND || { bgm() {}, sfx() {}, unlock() {}, setVolume() {} };
+  const sfx = (n) => SND.sfx(n);
+
+  /* ===========================================================
+   *  3. 저장소 & 설정
+   * =========================================================== */
+  const KEY = CFG.saveKey || 'vn';
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem(`${KEY}:${k}`)); } catch { return null; } },
+    set(k, v) {
+      try { localStorage.setItem(`${KEY}:${k}`, JSON.stringify(v)); return true; }
+      catch { toast('저장 공간이 부족하거나 저장이 막혀 있어요'); return false; }
+    },
+  };
+
+  const DEFAULT_SETTINGS = { textSpeed: 26, autoDelay: 1300, affToast: true, boxAlpha: 0.84, bgmVol: 0.55, sfxVol: 0.7, nextSfx: true };
+  let settings = { ...DEFAULT_SETTINGS, ...(store.get('settings') || {}) };
+
+  function applySettings() {
+    document.documentElement.style.setProperty('--tb-alpha', settings.boxAlpha);
+    SND.setVolume('bgm', settings.bgmVol);
+    SND.setVolume('sfx', settings.sfxVol);
+    store.set('settings', settings);
+  }
+
+  /* ===========================================================
+   *  4. 게임 상태
+   * =========================================================== */
+  function freshState() {
+    const aff = {};
+    Object.entries(CHARS).forEach(([id, c]) => { if (c.heroine) aff[id] = c.startAffection || 0; });
+    return {
+      label: CFG.startLabel, index: 0, stack: [],
+      aff, flags: {}, bg: null, bgm: null, stage: {}, speaker: null,
+      chapter: '', line: '', log: [],
+    };
+  }
+
+  let S = freshState();
+  let running = false, runId = 0;
+  let waiting = null;            // 'say' | 'choice' | 'card' | 'end'
+  let typing = null;
+  let auto = false, skip = false;
+  let autoTimer = 0, cardTimer = 0, placeTimer = 0;
+  let modalOpen = false, uiHidden = false;
+  let suppressLogOnce = false;
+
+  const evalFn = (v) => (typeof v === 'function' ? v(S) : v);
+  const isMobile = () => document.body.classList.contains('m');
+  const skipping = () => skip;
+
+  /* ===========================================================
+   *  5. 실행 루프
+   * =========================================================== */
+  function popFrame() {
+    const f = S.stack.pop();
+    S.label = f.label; S.index = f.index;
+  }
+
+  function current() {
+    for (;;) {
+      const list = LABELS[S.label];
+      if (!list) throw new Error(`라벨을 찾을 수 없어요: "${S.label}"`);
+      if (S.index >= list.length) {
+        if (S.stack.length) { popFrame(); continue; }
+        return null;
+      }
+      const c = list[S.index];
+      if (c.ret) {
+        if (S.stack.length) popFrame(); else S.index++;
+        continue;
+      }
+      return c;
+    }
+  }
+
+  async function run() {
+    if (running) return;
+    running = true;
+    const my = ++runId;
+    try {
+      for (let guard = 0; guard < 10000; guard++) {
+        if (my !== runId) return;
+        const cmd = current();
+        if (!cmd) { endOfStory(); return; }
+        const r = await exec(cmd);
+        if (my !== runId) return;
+        if (r === BLOCK) return;
+        if (r !== JUMPED) S.index++;
+      }
+      throw new Error('명령이 너무 많이 연속 실행되었어요 (무한 반복 확인)');
+    } catch (e) {
+      console.error(e);
+      toast(`⚠ ${esc(e.message)}`, '#ff8a80');
+    } finally {
+      if (my === runId) running = false;
+    }
+  }
+
+  async function exec(c) {
+    switch (c.type) {
+      case 'say': return execSay(c);
+      case 'show': {
+        if (!CHARS[c.who]) { console.warn('[VN] 알 수 없는 캐릭터', c.who); return; }
+        S.stage[c.who] = { pos: c.pos, face: c.face || 'normal', look: c.look || 'auto' };
+        renderStage(skipping(), { [c.who]: c.from });
+        return;
+      }
+      case 'hide': delete S.stage[c.who]; renderStage(skipping()); return;
+      case 'hideAll': S.stage = {}; renderStage(skipping()); return;
+      case 'move': if (S.stage[c.who]) { S.stage[c.who].pos = c.pos; renderStage(skipping()); } return;
+      case 'face': if (S.stage[c.who]) { S.stage[c.who].face = c.face; renderStage(skipping()); } return;
+      case 'look': if (S.stage[c.who]) { S.stage[c.who].look = c.dir; renderStage(skipping()); } return;
+      case 'bg': await changeBg(c.id, c.fade, c); return;
+      case 'place': showPlace(evalFn(c.where), evalFn(c.when)); return;
+      case 'chapter': return showCard(c);
+      case 'choice': return showChoice(c);
+      case 'if': {
+        const target = evalFn(c.cond) ? c.t : c.e;
+        if (!target) return;
+        S.stack.push({ label: S.label, index: S.index + 1 });
+        S.label = target; S.index = 0;
+        return JUMPED;
+      }
+      case 'aff': applyAff(c.o); return;
+      case 'set': Object.assign(S.flags, clone(c.o)); return;
+      case 'jump': S.stack = []; S.label = c.to; S.index = 0; return JUMPED;
+      case 'wait': if (!skipping()) await sleep(c.ms); return;
+      case 'fx': doFx(c.name, c.who); return;
+      case 'call': c.fn(S, api); return;
+      case 'bgm': S.bgm = c.id || null; SND.bgm(S.bgm); return;
+      case 'sfx': if (!skipping()) sfx(c.name); return;
+      case 'endcard': return showEndcard(c);
+      default: console.warn('[VN] 알 수 없는 명령', c); return;
+    }
+  }
+
+  function endOfStory() {
+    stopAll();
+    showScreen('title');
+  }
+
+  /* ===========================================================
+   *  6. 대사창 & 타이핑
+   * =========================================================== */
+  function execSay(c) {
+    const text = String(evalFn(c.text) ?? '');
+    const who = c.who || null;
+    const ch = who ? CHARS[who] : null;
+    if (who && c.face && S.stage[who]) S.stage[who].face = c.face;
+    S.speaker = c.msg ? null : who;
+    renderStage(skipping());
+    if (c.hop && who && !skipping()) { hop(who); sfx('hop'); }
+    if (!skipping()) { if (c.sfx) sfx(c.sfx); else if (c.msg) sfx('msg'); }
+
+    const tb = $('#textbox');
+    const name = c.as || (ch ? ch.name : who || '');
+    tb.classList.toggle('narr', !who);
+    tb.classList.toggle('whisper', !!c.whisper);
+    tb.classList.toggle('msg', !!c.msg);
+    tb.style.setProperty('--c', ch ? ch.color : '#e9a8a2');
+    $('#nameplate span').textContent = name;
+
+    S.line = text;
+    if (suppressLogOnce) suppressLogOnce = false;
+    else S.log.push({ name: who ? name : '', color: ch ? ch.color : '', text, whisper: !!c.whisper });
+    if (S.log.length > 400) S.log.splice(0, S.log.length - 400);
+
+    waiting = 'say';
+    startTyping(text);
+    return BLOCK;
+  }
+
+  function startTyping(text) {
+    cancelTyping();
+    $('#next').classList.remove('on');
+    const shown = $('#text .shown'), rest = $('#text .rest');
+    const speed = skipping() ? 0 : settings.textSpeed;
+    if (!speed) { shown.textContent = text; rest.textContent = ''; onTyped(); return; }
+    shown.textContent = ''; rest.textContent = text;
+    const t0 = performance.now();
+    let n0 = -1;
+    typing = { text, raf: 0 };
+    const tick = (now) => {
+      if (!typing) return;
+      const n = Math.min(text.length, Math.floor((now - t0) / speed) + 1);
+      if (n !== n0) { n0 = n; shown.textContent = text.slice(0, n); rest.textContent = text.slice(n); }
+      if (n >= text.length) { typing = null; onTyped(); }
+      else typing.raf = requestAnimationFrame(tick);
+    };
+    typing.raf = requestAnimationFrame(tick);
+  }
+
+  function cancelTyping() {
+    if (typing) cancelAnimationFrame(typing.raf);
+    typing = null;
+  }
+
+  function finishTyping() {
+    if (!typing) return;
+    const t = typing.text;
+    cancelTyping();
+    $('#text .shown').textContent = t;
+    $('#text .rest').textContent = '';
+    onTyped();
+  }
+
+  function onTyped() {
+    $('#next').classList.add('on');
+    scheduleAuto();
+  }
+
+  function clearAuto() { clearTimeout(autoTimer); autoTimer = 0; }
+
+  function scheduleAuto() {
+    clearAuto();
+    if (waiting !== 'say' || typing || modalOpen) return;
+    const go = () => { if (waiting === 'say' && !typing && !modalOpen) next(); };
+    if (skip) autoTimer = setTimeout(go, 45);
+    else if (auto) autoTimer = setTimeout(go, settings.autoDelay + S.line.length * 38);
+  }
+
+  function next() {
+    if (!skip && settings.nextSfx) sfx('next');
+    clearAuto();
+    $('#next').classList.remove('on');
+    waiting = null;
+    S.index++;
+    run();
+  }
+
+  function advance() {
+    if (modalOpen) return;
+    if (uiHidden) { setHidden(false); return; }
+    if (waiting === 'say') {
+      if (typing) finishTyping(); else next();
+    } else if (waiting === 'card') closeCard();
+  }
+
+  /* ===========================================================
+   *  7. 캐릭터 렌더링
+   * =========================================================== */
+  const probeCache = {};
+  function probe(url) {
+    if (!probeCache[url]) {
+      probeCache[url] = new Promise((res) => {
+        const img = new Image();
+        img.onload = () => res(true);
+        img.onerror = () => res(false);
+        img.src = url;
+      });
+    }
+    return probeCache[url];
+  }
+  async function firstLoadable(list) {
+    for (const u of list) if (await probe(u)) return u;
+    return null;
+  }
+
+  const faceCache = {};
+  function resolveFace(id, face) {
+    const key = `${id}/${face}`;
+    if (faceCache[key]) return faceCache[key];
+    const c = CHARS[id];
+    const dir = c.folder || `assets/characters/${id}`;
+    const exts = CFG.imageFormats || ['png'];
+    const list = exts.map((x) => `${dir}/${face}.${x}`);
+    if (face !== 'normal') exts.forEach((x) => list.push(`${dir}/normal.${x}`));
+    faceCache[key] = firstLoadable(list).then((u) => u || placeholderChar(id, face));
+    return faceCache[key];
+  }
+
+  function placeholderChar(id, face) {
+    const c = CHARS[id];
+    const col = c.color || '#aaaaaa';
+    const hair = (c.placeholder && c.placeholder.hair) || 'bob';
+    const dir = c.folder || `assets/characters/${id}`;
+    const hairPath = {
+      long: 'M152 220 C150 120 200 88 250 88 C300 88 350 120 348 220 L362 470 C340 452 318 446 300 446 L300 300 L200 300 L200 446 C182 446 160 452 138 470 Z',
+      straight: 'M156 215 C152 118 200 86 250 86 C300 86 348 118 344 215 L350 420 L306 412 L300 300 L200 300 L194 412 L150 420 Z',
+      bob: 'M150 225 C146 120 198 86 250 86 C302 86 354 120 350 225 L352 318 L318 322 L310 270 L190 270 L182 322 L148 318 Z',
+    }[hair];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 1000" width="500" height="1000">
+<defs>
+<linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".92"/><stop offset=".75" stop-color="${col}" stop-opacity=".55"/><stop offset="1" stop-color="${col}" stop-opacity=".25"/></linearGradient>
+<linearGradient id="h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<path d="${hairPath}" fill="${col}" opacity=".55"/>
+<path d="M70 1000 C70 640 100 455 178 410 C206 394 228 388 250 388 C272 388 294 394 322 410 C400 455 430 640 430 1000 Z" fill="url(#g)"/>
+<path d="M218 310 L282 310 L290 396 L210 396 Z" fill="url(#g)"/>
+<ellipse cx="250" cy="215" rx="88" ry="106" fill="url(#g)"/>
+<ellipse cx="226" cy="178" rx="44" ry="56" fill="url(#h)"/>
+<rect x="140" y="520" width="220" height="132" rx="22" fill="rgba(16,19,32,.55)"/>
+<text x="250" y="576" text-anchor="middle" font-family="sans-serif" font-size="40" font-weight="700" fill="#fff">${esc(c.name)}</text>
+<text x="250" y="626" text-anchor="middle" font-family="sans-serif" font-size="26" fill="rgba(255,255,255,.82)">${esc(FACE_LABEL[face] || face)} · ${esc(face)}</text>
+<text x="250" y="972" text-anchor="middle" font-family="monospace" font-size="17" fill="rgba(255,255,255,.75)">${esc(dir)}/${esc(face)}.png</text>
+</svg>`;
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+
+  function posX(pos) {
+    const p = POS[pos] || POS.center;
+    return isMobile() ? (p.mx ?? p.x) : p.x;
+  }
+
+  function lookOf(id) {
+    const e = S.stage[id];
+    if (e.look && e.look !== 'auto') return e.look;
+    const others = Object.keys(S.stage).filter((k) => k !== id && CHARS[k] && !CHARS[k].noSprite);
+    if (!others.length) return 'front';
+    const me = posX(e.pos);
+    const avg = others.reduce((a, k) => a + posX(S.stage[k].pos), 0) / others.length;
+    if (Math.abs(avg - me) < 1) return 'front';
+    return avg > me ? 'right' : 'left';
+  }
+
+  function layoutFor(id, e) {
+    const c = CHARS[id];
+    const base = { scale: c.scale ?? 1, offsetX: c.offsetX ?? 0, offsetY: c.offsetY ?? 0 };
+    const m = isMobile() ? (c.mobile || {}) : {};
+    const f = (c.faceAdjust && c.faceAdjust[e.face]) || {};
+    return { ...base, ...m, ...f };
+  }
+
+  function charEl(id) {
+    return $(`#chars .char[data-id="${id}"]:not(.leave)`);
+  }
+
+  function createChar(id) {
+    const el = document.createElement('div');
+    el.className = 'char';
+    el.dataset.id = id;
+    el.innerHTML = '<div class="bob"><div class="inner"></div></div>';
+    return el;
+  }
+
+  function applyLayout(el, id, e) {
+    const c = CHARS[id];
+    const L = layoutFor(id, e);
+    el.style.setProperty('--x', `${posX(e.pos) + L.offsetX}%`);
+    el.style.setProperty('--h', `calc(var(--char-base) * ${L.scale})`);
+    el.style.setProperty('--by', `calc(var(--char-base) * ${L.scale * -L.offsetY / 100})`);
+    const dir = lookOf(id);
+    const canFlip = c.allowFlip !== false && c.lookDir && c.lookDir !== 'front';
+    const flip = canFlip && dir !== 'front' && dir !== c.lookDir ? -1 : 1;
+    const lean = c.lean ?? 10;
+    const inner = $('.inner', el);
+    inner.style.setProperty('--flip', flip);
+    inner.style.setProperty('--lean', `${dir === 'right' ? lean : dir === 'left' ? -lean : 0}px`);
+  }
+
+  async function setFace(el, id, face, instant) {
+    const url = await resolveFace(id, face);
+    if (!el.isConnected || el.dataset.src === url) return;
+    el.dataset.src = url;
+    const inner = $('.inner', el);
+    const olds = $$('.face', inner);
+    const img = document.createElement('img');
+    img.className = 'face';
+    img.alt = '';
+    img.draggable = false;
+    img.src = url;
+    if (instant || !olds.length) {
+      olds.forEach((o) => o.remove());
+      inner.appendChild(img);
+      return;
+    }
+    img.classList.add('incoming');
+    inner.appendChild(img);
+    try { await img.decode(); } catch { /* ignore */ }
+    if (el.dataset.src !== url) { img.remove(); return; }
+    requestAnimationFrame(() => img.classList.add('in'));
+    setTimeout(() => {
+      if (el.dataset.src !== url) return;
+      olds.forEach((o) => o.remove());
+      img.classList.remove('incoming', 'in');
+    }, 300);
+  }
+
+  function renderStage(instant, enter = {}) {
+    const layer = $('#chars');
+    if (instant) layer.classList.add('instant');
+
+    $$('.char', layer).forEach((el) => {
+      if (!S.stage[el.dataset.id] && !el.classList.contains('leave')) {
+        el.classList.add('leave');
+        setTimeout(() => el.remove(), instant ? 0 : 560);
+      }
+    });
+
+    Object.keys(S.stage).forEach((id) => {
+      const c = CHARS[id];
+      if (!c || c.noSprite) return;
+      const e = S.stage[id];
+      let el = charEl(id);
+      const isNew = !el;
+      if (isNew) {
+        el = createChar(id);
+        layer.appendChild(el);
+        if (!instant) {
+          const from = enter[id];
+          el.style.setProperty('--ex', from === 'left' ? '-9vw' : from === 'right' ? '9vw' : '0px');
+          el.style.setProperty('--ey', from ? '0px' : '16px');
+          el.classList.add('enter');
+        }
+      }
+      applyLayout(el, id, e);
+      setFace(el, id, e.face, instant || isNew);
+      const speaking = S.speaker === id;
+      el.classList.toggle('speaking', speaking);
+      el.classList.toggle('dim', !!S.speaker && !speaking);
+      if (isNew && !instant) {
+        void el.offsetWidth;
+        requestAnimationFrame(() => {
+          el.classList.remove('enter');
+          el.style.setProperty('--ex', '0px');
+          el.style.setProperty('--ey', '0px');
+        });
+      }
+    });
+
+    if (instant) requestAnimationFrame(() => requestAnimationFrame(() => layer.classList.remove('instant')));
+  }
+
+  function hop(id) {
+    const el = charEl(id);
+    if (!el) return;
+    const b = $('.bob', el);
+    b.classList.remove('hop');
+    void b.offsetWidth;
+    b.classList.add('hop');
+  }
+
+  function doFx(name, who) {
+    if (skipping()) return;
+    if (name === 'hop') return hop(who);
+    if (name === 'shake') {
+      const st = $('#stage');
+      st.classList.remove('shake'); void st.offsetWidth; st.classList.add('shake');
+    }
+    if (name === 'flash') {
+      const f = $('#flash');
+      f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
+    }
+  }
+
+  /* ===========================================================
+   *  8. 배경
+   * =========================================================== */
+  const bgCache = {};
+  const bgResolved = {};
+  function resolveBg(id) {
+    if (bgCache[id]) return bgCache[id];
+    const b = BGS[id] || {};
+    const base = b.src ? b.src.replace(/\.[a-z0-9]+$/i, '') : `assets/bg/${id}`;
+    const list = b.src ? [b.src] : [];
+    (CFG.bgFormats || ['jpg']).forEach((x) => list.push(`${base}.${x}`));
+    bgCache[id] = firstLoadable(list).then((u) => (bgResolved[id] = u || null));
+    return bgCache[id];
+  }
+
+  function bgPlaceholderCss(id) {
+    const b = BGS[id] || { ph: ['#333', '#111'] };
+    const [a, z] = b.ph || ['#333', '#111'];
+    return `radial-gradient(120% 80% at 80% 10%, rgba(255,255,255,.28), transparent 60%),
+      radial-gradient(90% 60% at 10% 90%, rgba(255,255,255,.12), transparent 60%),
+      linear-gradient(165deg, ${a}, ${z})`;
+  }
+
+  let bgFront = 'A';
+  async function paintBg(id, instant) {
+    const url = id ? await resolveBg(id) : null;
+    const back = $(`#bg${bgFront === 'A' ? 'B' : 'A'}`);
+    const front = $(`#bg${bgFront}`);
+    const b = BGS[id] || {};
+    back.style.backgroundImage = url ? `url("${url}")` : bgPlaceholderCss(id);
+    back.style.backgroundPosition = b.focus || '50% 50%';
+    $('.bg-label', back).innerHTML = url || !id ? '' :
+      `<b>${esc(b.name || id)}</b><span>assets/bg/${esc(id)}.jpg</span>`;
+    if (instant) { back.classList.add('instant'); front.classList.add('instant'); }
+    back.classList.add('show');
+    front.classList.remove('show');
+    bgFront = bgFront === 'A' ? 'B' : 'A';
+    if (instant) requestAnimationFrame(() => requestAnimationFrame(() => {
+      back.classList.remove('instant'); front.classList.remove('instant');
+    }));
+  }
+
+  async function changeBg(id, fade, opts = {}) {
+    S.bg = id;
+    const fast = skipping();
+    if (fade === 'black' && !fast) {
+      sfx('scene');
+      const f = $('#fade');
+      f.classList.add('on');
+      await sleep(480);
+      if (!opts.keep) { S.stage = {}; S.speaker = null; renderStage(true); }
+      await paintBg(id, true);
+      await sleep(120);
+      f.classList.remove('on');
+      await sleep(260);
+    } else {
+      if (fade === 'black' && !opts.keep) { S.stage = {}; S.speaker = null; renderStage(true); }
+      await paintBg(id, fast || fade === 'none');
+    }
+  }
+
+  /* ===========================================================
+   *  9. 연출: 장소 표시, 챕터 카드, 선택지, 엔드카드, 토스트
+   * =========================================================== */
+  function showPlace(where, when) {
+    const el = $('#place');
+    $('b', el).textContent = where || '';
+    $('span', el).textContent = when || '';
+    el.classList.remove('on');
+    void el.offsetWidth;
+    el.classList.add('on');
+    clearTimeout(placeTimer);
+    placeTimer = setTimeout(() => el.classList.remove('on'), skipping() ? 900 : 3800);
+  }
+
+  function showCard(c) {
+    S.chapter = [c.kicker, c.title].filter(Boolean).join(' · ');
+    const card = $('#card');
+    $('.card-kicker', card).textContent = c.kicker || '';
+    $('.card-title', card).textContent = c.title || '';
+    $('.card-sub', card).textContent = c.sub || '';
+    card.classList.add('on');
+    if (!skip) sfx('card');
+    waiting = 'card';
+    suppressLogOnce = false;
+    autosave();
+    clearTimeout(cardTimer);
+    cardTimer = setTimeout(closeCard, skip ? 300 : 3200);
+    return BLOCK;
+  }
+
+  function closeCard() {
+    if (waiting !== 'card') return;
+    clearTimeout(cardTimer);
+    $('#card').classList.remove('on');
+    waiting = null;
+    S.index++;
+    run();
+  }
+
+  function showChoice(c) {
+    setSkip(false);
+    clearAuto();
+    suppressLogOnce = false;
+    const box = $('#choices');
+    const list = $('.choice-list', box);
+    $('.choice-prompt', box).textContent = c.prompt ? String(evalFn(c.prompt)) : '';
+    list.innerHTML = '';
+    const opts = c.choice.filter((o) => !o.if || evalFn(o.if));
+    opts.forEach((o, i) => {
+      const b = document.createElement('button');
+      b.className = 'choice';
+      b.style.animationDelay = `${120 + i * 80}ms`;
+      const label = String(evalFn(o.text));
+      b.innerHTML = `<em>${String(i + 1).padStart(2, '0')}</em><span>${esc(label)}</span>`;
+      b.addEventListener('click', (ev) => { ev.stopPropagation(); pick(o, label); });
+      b.addEventListener('mouseenter', () => { if (matchMedia('(hover: hover)').matches) sfx('hover'); });
+      list.appendChild(b);
+    });
+    box.classList.add('on');
+    sfx('choice');
+    waiting = 'choice';
+    autosave();
+    return BLOCK;
+  }
+
+  function pick(o, label) {
+    if (waiting !== 'choice') return;
+    $('#choices').classList.remove('on');
+    sfx('select');
+    waiting = null;
+    S.log.push({ choice: true, text: label });
+    if (o.aff) applyAff(o.aff);
+    if (o.set) Object.assign(S.flags, clone(o.set));
+    if (o.sub) {
+      S.stack.push({ label: S.label, index: S.index + 1 });
+      S.label = o.sub; S.index = 0;
+    } else if (o.jump) {
+      S.stack = []; S.label = o.jump; S.index = 0;
+    } else S.index++;
+    run();
+  }
+
+  function pickByNumber(n) {
+    if (waiting !== 'choice' || modalOpen) return;
+    const b = $$('#choices .choice')[n - 1];
+    if (b) b.click();
+  }
+
+  function applyAff(o) {
+    Object.entries(o).forEach(([id, v]) => {
+      if (!(id in S.aff)) S.aff[id] = 0;
+      S.aff[id] = Math.max(0, Math.min(100, S.aff[id] + v));
+      if (v > 0 && !skipping()) setTimeout(() => sfx('aff'), 350);
+      if (settings.affToast && v && !skipping()) {
+        const c = CHARS[id];
+        toast(`<i>♥</i>${esc(c ? c.name : id)} <small>${v > 0 ? '마음이 조금 움직였다' : '마음이 살짝 식었다'}</small>`, c && c.color);
+      }
+    });
+  }
+
+  function stageLabel(c, v) {
+    let label = '';
+    (c.stages || []).forEach(([min, l]) => { if (v >= min) label = l; });
+    return label;
+  }
+
+  function statsHtml() {
+    return Object.entries(CHARS).filter(([, c]) => c.heroine).map(([id, c]) => {
+      const v = S.aff[id] ?? 0;
+      return `<div class="stat" style="--c:${c.color}">
+        <div class="stat-top"><b>${esc(c.fullName || c.name)}</b><span>${esc(stageLabel(c, v))}</span></div>
+        <div class="bar"><i style="width:${Math.max(2, v)}%"></i></div>
+        <small>${esc(c.role || '')}</small></div>`;
+    }).join('');
+  }
+
+  function showEndcard(c) {
+    setSkip(false);
+    setAuto(false);
+    const el = $('#endcard');
+    $('.ec-kicker', el).textContent = evalFn(c.kicker) || '';
+    $('.ec-title', el).textContent = evalFn(c.title) || '';
+    $('.ec-text', el).textContent = evalFn(c.text) || '';
+    $('.ec-stats', el).innerHTML = statsHtml();
+    $('.ec-next', el).textContent = evalFn(c.next) || '';
+    el.classList.add('on');
+    waiting = 'end';
+    if (c.id) {
+      const sys = store.get('system') || { cleared: {} };
+      sys.cleared[c.id] = Date.now();
+      store.set('system', sys);
+    }
+    return BLOCK;
+  }
+
+  function toast(html, color) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    if (color) t.style.setProperty('--c', color);
+    t.innerHTML = html;
+    $('#toasts').appendChild(t);
+    setTimeout(() => t.classList.add('out'), 2300);
+    setTimeout(() => t.remove(), 2900);
+  }
+
+  /* ===========================================================
+   *  10. AUTO / SKIP / HIDE
+   * =========================================================== */
+  function setAuto(on) {
+    auto = on;
+    if (on) skip = false;
+    syncQuick();
+    if (on && waiting === 'say' && !typing) scheduleAuto();
+    if (!on && !skip) clearAuto();
+  }
+
+  function setSkip(on) {
+    skip = on;
+    if (on) auto = false;
+    syncQuick();
+    $('#game').classList.toggle('skipping', on);
+    if (!on) { clearAuto(); return; }
+    if (waiting === 'say') { if (typing) finishTyping(); else scheduleAuto(); }
+    else if (waiting === 'card') closeCard();
+  }
+
+  function syncQuick() {
+    $('[data-q="auto"]').classList.toggle('active', auto);
+    $('[data-q="skip"]').classList.toggle('active', skip);
+  }
+
+  function setHidden(on) {
+    uiHidden = on;
+    $('#game').classList.toggle('ui-hidden', on);
+  }
+
+  /* ===========================================================
+   *  11. 세이브 / 로드
+   * =========================================================== */
+  function snapshot() {
+    return {
+      v: 1, t: Date.now(),
+      label: S.label, index: S.index, stack: clone(S.stack),
+      aff: clone(S.aff), flags: clone(S.flags),
+      bg: S.bg, bgm: S.bgm, stage: clone(S.stage), speaker: S.speaker,
+      chapter: S.chapter, line: S.line, log: S.log.slice(-200),
+    };
+  }
+
+  const canSave = () => waiting === 'say' || waiting === 'choice';
+
+  function saveTo(slot) {
+    if (!canSave()) { toast('지금은 저장할 수 없어요'); return false; }
+    const ok = store.set(`slot:${slot}`, snapshot());
+    if (ok) sfx('save');
+    if (ok) toast(`<i>✓</i>${slot === 'auto' ? '자동' : slot + '번'} 슬롯에 저장했어요`);
+    return ok;
+  }
+
+  function autosave() { store.set('slot:auto', snapshot()); }
+
+  const slotKeys = () => ['auto', ...Array.from({ length: CFG.saveSlots || 9 }, (_, i) => String(i + 1))];
+  const readSlot = (k) => store.get(`slot:${k}`);
+
+  function latestSave() {
+    let best = null;
+    slotKeys().forEach((k) => {
+      const d = readSlot(k);
+      if (d && LABELS[d.label] && (!best || d.t > best.t)) best = d;
+    });
+    return best;
+  }
+
+  function resetStageDom() {
+    $('#chars').innerHTML = '';
+    ['#choices', '#card', '#endcard'].forEach((s) => $(s).classList.remove('on'));
+    $('#fade').classList.remove('on');
+    $('#text .shown').textContent = '';
+    $('#text .rest').textContent = '';
+    $('#nameplate span').textContent = '';
+    $('#textbox').className = 'narr';
+    $('#next').classList.remove('on');
+    setHidden(false);
+  }
+
+  function stopAll() {
+    runId++;
+    running = false;
+    clearAuto();
+    cancelTyping();
+    clearTimeout(cardTimer);
+    waiting = null;
+    auto = false;
+    skip = false;
+    syncQuick();
+    $('#game').classList.remove('skipping');
+  }
+
+  function startFrom(data) {
+    if (!data || !LABELS[data.label]) { toast('이 세이브는 현재 버전의 스토리와 맞지 않아요'); return; }
+    stopAll();
+    closeModal(true);
+    S = Object.assign(freshState(), clone(data));
+    const base = freshState().aff;
+    Object.keys(base).forEach((k) => { if (!(k in S.aff)) S.aff[k] = base[k]; });
+    resetStageDom();
+    showScreen('game');
+    paintBg(S.bg, true);
+    renderStage(true);
+    SND.bgm(S.bgm || null);
+    suppressLogOnce = true;
+    run();
+  }
+
+  function newGame() {
+    stopAll();
+    closeModal(true);
+    S = freshState();
+    SND.bgm(null);
+    resetStageDom();
+    paintBg(null, true);
+    showScreen('game');
+    run();
+  }
+
+  /* ===========================================================
+   *  12. 모달 (LOG / SAVE / LOAD / SETTINGS / MENU / STATUS)
+   * =========================================================== */
+  function openModal(title, build, cls = '') {
+    const m = $('#modal');
+    m.className = `modal on ${cls}`;
+    $('header h3', m).textContent = title;
+    const body = $('.modal-body', m);
+    body.innerHTML = '';
+    build(body);
+    sfx('open');
+    modalOpen = true;
+    clearAuto();
+  }
+
+  function closeModal(silent) {
+    const m = $('#modal');
+    if (!m.classList.contains('on')) { modalOpen = false; return; }
+    m.classList.remove('on');
+    modalOpen = false;
+    if (!silent) scheduleAuto();
+  }
+
+  function confirmBox(msg) {
+    return new Promise((res) => {
+      const c = $('#confirm');
+      $('p', c).textContent = msg;
+      c.classList.add('on');
+      const done = (v) => {
+        c.classList.remove('on');
+        $('.yes', c).onclick = $('.no', c).onclick = null;
+        res(v);
+      };
+      $('.yes', c).onclick = () => done(true);
+      $('.no', c).onclick = () => done(false);
+    });
+  }
+
+  function openLog() {
+    openModal('LOG', (body) => {
+      if (!S.log.length) { body.innerHTML = '<p class="empty-msg">아직 기록이 없어요</p>'; return; }
+      body.innerHTML = S.log.map((l) => l.choice
+        ? `<div class="log-choice">▸ ${esc(l.text)}</div>`
+        : `<div class="log-line${l.name ? '' : ' narr'}${l.whisper ? ' whisper' : ''}" style="--c:${l.color || 'transparent'}">
+            ${l.name ? `<b>${esc(l.name)}</b>` : ''}<p>${esc(l.text)}</p></div>`).join('');
+      requestAnimationFrame(() => { body.scrollTop = body.scrollHeight; });
+    }, 'log');
+  }
+
+  function fmtDate(t) {
+    const d = new Date(t);
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+
+  function openSlots(mode) {
+    openModal(mode === 'save' ? 'SAVE' : 'LOAD', (body) => {
+      const grid = document.createElement('div');
+      grid.className = 'slots';
+      slotKeys().forEach((k) => {
+        if (mode === 'save' && k === 'auto') return;
+        const d = readSlot(k);
+        const b = document.createElement('button');
+        b.className = 'slot' + (d ? '' : ' empty');
+        const thumb = d && d.bg ? (bgResolved[d.bg] ? `url("${bgResolved[d.bg]}")` : bgPlaceholderCss(d.bg)) : 'none';
+        b.innerHTML = `
+          <div class="slot-thumb" style='background-image:${thumb}'><span>${k === 'auto' ? 'AUTO' : 'NO.' + k.padStart(2, '0')}</span></div>
+          <div class="slot-info">${d
+            ? `<b>${esc(d.chapter || '—')}</b><p>${esc((d.line || '').slice(0, 46))}${(d.line || '').length > 46 ? '…' : ''}</p><time>${fmtDate(d.t)}</time>`
+            : '<p class="none">비어 있음</p>'}</div>`;
+        b.addEventListener('click', async () => {
+          if (mode === 'save') {
+            if (d && !(await confirmBox(`${k}번 슬롯에 덮어쓸까요?`))) return;
+            if (saveTo(k)) openSlots('save');
+          } else if (d) {
+            if ($('#game').classList.contains('active') && !(await confirmBox('이 세이브를 불러올까요?\n현재 진행 중인 내용은 사라져요.'))) return;
+            startFrom(d);
+          }
+        });
+        grid.appendChild(b);
+      });
+      body.appendChild(grid);
+    }, 'slots-modal');
+  }
+
+  function openSettings() {
+    openModal('SETTINGS', (body) => {
+      body.innerHTML = `
+        <label class="set-row"><span>글자 속도</span>
+          <input type="range" min="0" max="60" step="2" data-k="textSpeed">
+          <em class="hint">느림 ↔ 즉시</em></label>
+        <label class="set-row"><span>AUTO 대기 시간</span>
+          <input type="range" min="400" max="3600" step="100" data-k="autoDelay">
+          <em class="hint">짧게 ↔ 길게</em></label>
+        <label class="set-row"><span>대사창 불투명도</span>
+          <input type="range" min="0.35" max="1" step="0.05" data-k="boxAlpha">
+          <em class="hint">투명 ↔ 불투명</em></label>
+        <label class="set-row"><span>배경음악</span>
+          <input type="range" min="0" max="1" step="0.05" data-k="bgmVol">
+          <em class="hint">끔 ↔ 크게</em></label>
+        <label class="set-row"><span>효과음</span>
+          <input type="range" min="0" max="1" step="0.05" data-k="sfxVol">
+          <em class="hint">끔 ↔ 크게</em></label>
+        <label class="set-row toggle"><span>대사 넘김 소리</span>
+          <input type="checkbox" data-k="nextSfx"><i></i></label>
+        <label class="set-row toggle"><span>호감도 변화 알림</span>
+          <input type="checkbox" data-k="affToast"><i></i></label>
+        <p class="set-note">단축키 · Space/Enter 진행 · Ctrl 누르는 동안 SKIP · A 자동 · L 로그 · H 숨기기 · 1~3 선택지 · Esc 메뉴</p>`;
+      const ts = $('[data-k="textSpeed"]', body);
+      ts.value = 60 - settings.textSpeed;
+      ts.oninput = () => { settings.textSpeed = 60 - Number(ts.value); applySettings(); };
+      const ad = $('[data-k="autoDelay"]', body);
+      ad.value = settings.autoDelay;
+      ad.oninput = () => { settings.autoDelay = Number(ad.value); applySettings(); };
+      const ba = $('[data-k="boxAlpha"]', body);
+      ba.value = settings.boxAlpha;
+      ba.oninput = () => { settings.boxAlpha = Number(ba.value); applySettings(); };
+      const at = $('[data-k="affToast"]', body);
+      at.checked = settings.affToast;
+      at.onchange = () => { settings.affToast = at.checked; applySettings(); };
+      const bv = $('[data-k="bgmVol"]', body);
+      bv.value = settings.bgmVol;
+      bv.oninput = () => { settings.bgmVol = Number(bv.value); applySettings(); };
+      const sv = $('[data-k="sfxVol"]', body);
+      sv.value = settings.sfxVol;
+      sv.onchange = () => { settings.sfxVol = Number(sv.value); applySettings(); sfx('select'); };
+      const ns = $('[data-k="nextSfx"]', body);
+      ns.checked = settings.nextSfx;
+      ns.onchange = () => { settings.nextSfx = ns.checked; applySettings(); };
+    });
+  }
+
+  function openStatus() {
+    openModal('STATUS', (body) => {
+      body.innerHTML = `<p class="status-ch">${esc(S.chapter || '—')}</p><div class="stats">${statsHtml()}</div>`;
+    });
+  }
+
+  function openMenu() {
+    openModal('MENU', (body) => {
+      body.innerHTML = `<div class="menu-grid">
+        <button data-m="status"><b>STATUS</b><span>관계</span></button>
+        <button data-m="save"><b>SAVE</b><span>저장</span></button>
+        <button data-m="load"><b>LOAD</b><span>불러오기</span></button>
+        <button data-m="log"><b>LOG</b><span>대사 기록</span></button>
+        <button data-m="settings"><b>SETTINGS</b><span>설정</span></button>
+        <button data-m="title"><b>TITLE</b><span>타이틀로</span></button></div>`;
+      $$('[data-m]', body).forEach((b) => b.addEventListener('click', async () => {
+        const m = b.dataset.m;
+        if (m === 'status') openStatus();
+        if (m === 'save') openSlots('save');
+        if (m === 'load') openSlots('load');
+        if (m === 'log') openLog();
+        if (m === 'settings') openSettings();
+        if (m === 'title' && (await confirmBox('타이틀로 돌아갈까요?\n저장하지 않은 진행은 사라져요.'))) {
+          stopAll(); closeModal(true); showScreen('title');
+        }
+      }));
+    });
+  }
+
+  /* ===========================================================
+   *  13. 화면 전환 & 타이틀
+   * =========================================================== */
+  let tcTimer = 0;
+  function showScreen(name) {
+    $$('.screen').forEach((s) => s.classList.toggle('active', s.id === name));
+    clearInterval(tcTimer);
+    if (name === 'title') {
+      SND.bgm('title');
+      const ends = CFG.endings || [];
+      const got = (store.get('system') || { cleared: {} }).cleared || {};
+      const n = ends.filter((e) => got[e.id]).length;
+      const hid = ends.filter((e) => e.hidden && got[e.id]).length;
+      $('#endingCount').textContent = ends.length && n ? `ENDINGS ${n} / ${ends.length}` + (hid ? `  ·  HIDDEN ${hid}` : '') : '';
+      $('#btnContinue').disabled = !latestSave();
+      let f = 0;
+      tcTimer = setInterval(() => {
+        f++;
+        const p = (n) => String(n).padStart(2, '0');
+        const fr = f % 24, s = Math.floor(f / 24);
+        $('#timecode').textContent = `${p(Math.floor(s / 3600))}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}:${p(fr)}`;
+      }, 1000 / 24);
+    }
+  }
+
+  function buildPetals() {
+    const wrap = $('.petals');
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('i');
+      const size = 6 + Math.random() * 10;
+      p.style.cssText = `left:${Math.random() * 100}%;width:${size}px;height:${size * 0.72}px;` +
+        `animation-duration:${9 + Math.random() * 10}s,${3 + Math.random() * 3}s;` +
+        `animation-delay:${-Math.random() * 18}s,${-Math.random() * 3}s;opacity:${0.45 + Math.random() * 0.45}`;
+      wrap.appendChild(p);
+    }
+  }
+
+  /* ===========================================================
+   *  14. 레이아웃 (반응형)
+   * =========================================================== */
+  function layout() {
+    const w = window.innerWidth, h = window.innerHeight;
+    const portrait = h > w;
+    const m = portrait || w < 760;
+    document.body.classList.toggle('m', m);
+    document.body.classList.toggle('portrait', portrait);
+    const L = CFG.layout || {};
+    const base = portrait
+      ? Math.min(h * (L.portraitHeight ?? 0.8), w * (L.portraitMaxWidthRatio ?? 1.9))
+      : h * (L.landscapeHeight ?? 0.95);
+    document.documentElement.style.setProperty('--char-base', `${Math.round(base)}px`);
+    if (Object.keys(S.stage).length) renderStage(true);
+  }
+
+  /* ===========================================================
+   *  15. 입력
+   * =========================================================== */
+  function bindInput() {
+    // 브라우저 정책상 첫 터치/클릭 이후에만 소리가 날 수 있음
+    const unlock = () => { SND.unlock(); const h = $('#soundHint'); if (h) h.classList.add('off'); };
+    ['pointerdown', 'keydown', 'touchstart'].forEach((e) => window.addEventListener(e, unlock, { capture: true, passive: true }));
+    $('.title-menu').addEventListener('click', (ev) => {
+      const b = ev.target.closest('button');
+      if (!b || b.disabled) return;
+      SND.unlock();
+      sfx('select');
+      const act = b.dataset.act;
+      if (act === 'new') newGame();
+      if (act === 'continue') { const d = latestSave(); if (d) startFrom(d); }
+      if (act === 'load') openSlots('load');
+      if (act === 'settings') openSettings();
+    });
+
+    $('#game').addEventListener('click', (ev) => {
+      if (ev.target.closest('#quick, #choices, #endcard')) return;
+      advance();
+    });
+
+    $('#quick').addEventListener('click', (ev) => {
+      const b = ev.target.closest('button');
+      if (!b) return;
+      ev.stopPropagation();
+      const q = b.dataset.q;
+      if (q === 'auto') setAuto(!auto);
+      if (q === 'skip') setSkip(!skip);
+      if (q === 'log') openLog();
+      if (q === 'save') openSlots('save');
+      if (q === 'load') openSlots('load');
+      if (q === 'hide') setHidden(true);
+      if (q === 'menu') openMenu();
+    });
+
+    $('#endcard .ec-btn').addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      stopAll();
+      $('#endcard').classList.remove('on');
+      showScreen('title');
+    });
+
+    $('#modal').addEventListener('click', (ev) => {
+      if (ev.target.id === 'modal' || ev.target.closest('.x')) closeModal();
+    });
+
+    window.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape') {
+        if ($('#confirm').classList.contains('on')) return;
+        if (modalOpen) closeModal();
+        else if ($('#game').classList.contains('active')) openMenu();
+        return;
+      }
+      if (!$('#game').classList.contains('active') || modalOpen) return;
+      if (ev.key === 'Control' && !ev.repeat) { setSkip(true); return; }
+      if (ev.repeat) return;
+      if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); advance(); }
+      else if (/^[1-9]$/.test(ev.key)) pickByNumber(Number(ev.key));
+      else if (ev.key === 'a' || ev.key === 'A') setAuto(!auto);
+      else if (ev.key === 'l' || ev.key === 'L') openLog();
+      else if (ev.key === 'h' || ev.key === 'H') setHidden(!uiHidden);
+    });
+    window.addEventListener('keyup', (ev) => { if (ev.key === 'Control') setSkip(false); });
+    window.addEventListener('blur', () => { if (skip) setSkip(false); });
+
+    $('#stage').addEventListener('wheel', (ev) => {
+      if (ev.deltaY < 0 && $('#game').classList.contains('active') && !modalOpen) openLog();
+    }, { passive: true });
+
+    window.addEventListener('resize', layout);
+    window.addEventListener('orientationchange', () => setTimeout(layout, 200));
+  }
+
+  /* ===========================================================
+   *  16. 부팅
+   * =========================================================== */
+  function validate() {
+    if (!LABELS[CFG.startLabel]) console.error(`[VN] 시작 라벨 "${CFG.startLabel}"이 없어요`);
+    Object.entries(LABELS).forEach(([name, list]) => list.forEach((c) => {
+      const targets = [];
+      if (c.type === 'jump') targets.push(c.to);
+      if (c.type === 'choice') c.choice.forEach((o) => o.jump && targets.push(o.jump));
+      targets.forEach((t) => { if (!LABELS[t]) console.error(`[VN] "${name}"에서 존재하지 않는 라벨 "${t}"로 이동합니다`); });
+      if (c.type === 'show' && !CHARS[c.who]) console.error(`[VN] "${name}": 알 수 없는 캐릭터 "${c.who}"`);
+      if (c.type === 'bg' && !BGS[c.id]) console.warn(`[VN] "${name}": config에 없는 배경 "${c.id}"`);
+    }));
+  }
+
+  function preload() {
+    Object.entries(CHARS).forEach(([id, c]) => {
+      if (c.noSprite) return;
+      (c.faces || ['normal']).forEach((f) => resolveFace(id, f));
+    });
+    Object.keys(BGS).forEach((id) => resolveBg(id));
+  }
+
+  async function titleImage() {
+    if (!CFG.titleImage) return;
+    const u = await firstLoadable((CFG.bgFormats || ['jpg']).map((x) => `${CFG.titleImage}.${x}`));
+    if (u) $('.title-bg').style.backgroundImage = `url("${u}")`;
+  }
+
+  function boot() {
+    document.title = CFG.title;
+    const tv = document.getElementById('titleVersion');
+    if (tv && CFG.version) tv.textContent = CFG.version;   // 타이틀 버전 = GAME_CONFIG.version
+    applySettings();
+    validate();
+    layout();
+    bindInput();
+    buildPetals();
+    showScreen('title');
+    preload();
+    titleImage();
+  }
+
+  const api = {
+    dsl, label: defineLabel, boot,
+    get state() { return S; },
+    get labels() { return LABELS; },
+    toast,
+    /** 엔딩/루트 판정 등에 쓰는 도우미 */
+    gain: (id) => (S.aff[id] ?? 0) - ((CHARS[id] && CHARS[id].startAffection) || 0),
+  };
+  window.VN = api;
+})();
+
+</script>
+<!-- 스토리: 챕터를 추가하면 여기에 한 줄씩 -->
+<script>/* ==== js/story/prologue.js ==== */
+/* =============================================================
+ *  PROLOGUE — 개강
+ * ============================================================= */
+(() => {
+  const { say, narr, show, hide, hideAll, move, bg, place, chapter, jump, bgm } = VN.dsl;
+  // 화자 단축 함수: Y(표정, 대사, 옵션)
+  const Y = (f, t, o) => say('yujin', f, t, o);
+  const J = (f, t, o) => say('jia', f, t, o);
+  const SY = (f, t, o) => say('seoyeon', f, t, o);
+  const M = (t, o) => say('minhyuk', null, t, o);
+  const ON_AIR = { as: 'YSBS 아침 방송', sfx: 'onair' };
+  const RADIO = { as: 'YSBS 아침 방송' };
+
+  VN.label('prologue', [
+    chapter('PROLOGUE', '개강', ''),
+    bgm('daily'),
+    bg('campus_gate', 'black'),
+    place('연서대학교 정문', '3월 2일 (월) · 오전 8:52'),
+
+    show('jia', 'center', 'normal'),
+    J('normal', '52분.'),
+    J('annoyed', '김도연 진짜 첫날부터…'),
+
+    move('jia', 'midright'),
+    show('yujin', 'midleft', 'surprised', { from: 'left' }),
+    Y('surprised', '나은아! 진짜 미안. 늦잠잤다...', { hop: true }),
+    J('annoyed', '알람 몇 개 맞췄는데.'),
+    Y('smile', '다섯 개.'),
+    J('normal', '근데.'),
+    Y('smile', '다섯 개 다 끄고 잤어. 내 무의식이 이긴거지ㅎㅎ'),
+    J('smile', '아 그걸 왜 자랑스럽게 말해.'),
+    J('normal', '자. 바닐라 샷추가.'),
+    Y('smile', '헐 뭐야, 내 거야? 역시 이나은 최고.'),
+    J('shy', '됐어, 내거 사면서 산 거야.'),
+    Y('surprised', '어? 이거 안 달다. 딱 좋아.'),
+    J('surprised', '…'),
+    J('normal', '알바생이 그렇게 줬어.'),
+    Y('smile', '거기 어디야? 나 단골 할래.'),
+    J('shy', '…그냥 학교 앞.'),
+
+    narr('정문 기둥에 달린 스피커에서 차임벨이 울렸다.'),
+    say('seoyeon', null, '좋은 아침입니다. YSBS 아침 방송, 정채연입니다.', ON_AIR),
+    say('seoyeon', null, '개강 첫날이네요. 오늘 낮엔 11도까지 오르지만 아침저녁은 아직 쌀쌀합니다. 겉옷 꼭 챙기세요.', RADIO),
+    say('seoyeon', null, '수강 정정은 이번 주 금요일 오후 다섯 시까지입니다. 아직 시간표 못 짜신 분들, 오늘 안에 꼭 확인하세요.', RADIO),
+    Y('surprised', '어? 정정 금요일까지야?'),
+    J('normal', '응. 너 아직 안 했지.'),
+    Y('smile', '…나은아 나 시간표 좀 봐 줘.'),
+    J('smile', '그럴 줄 알았다.'),
+    Y('normal', '근데 저 목소리 좋다. 누구야?'),
+    J('normal', '방송부원이겠지. 매일 아침에 나와.'),
+    Y('surprised', '매일? 작년에도?'),
+    J('smile', '…너 작년에 학교 다닌 거 맞지?'),
+    Y('annoyed', '다녔거든. 이어폰 꽂고 다녔을 뿐이야.'),
+
+    bg('campus_path', 'cross'),
+    place('중앙 산책로', '오전 8:58'),
+    J('normal', '너 올해는 뭐 해 본다며. 정했어?'),
+    Y('normal', '아직. 근데 진짜 뭐라도 할 거야. 작년처럼 집 학교 집은 이제 싫어.'),
+    J('smile', '작년엔 너 진짜 맨날 누워 있었어. 뭐하냐고 물어보면 \'응… 누워 있어…\'.'),
+    Y('annoyed', '누워 있는 것도 일이야. 체력 소모 장난 아니야.'),
+    narr('바람에 날려 온 전단지가 도연의 운동화 앞코에 달라붙었다.'),
+    Y('surprised', '으악. 뭐야 이거.'),
+    narr('YSBS 수습국원 모집 — 아나운서부 · PD부 · 기술부\n설명회 3월 4일(수) 오후 4시, 학생회관 204호'),
+    Y('smile', '헐, 이거 방금 그 방송국이잖아. 운명 아냐?'),
+    J('smile', '바람 분 거잖아.'),
+    Y('normal', '기술부… 이거 편집 같은 거 하는 데겠지? 나 이런 거 해 보고 싶었는데.'),
+    J('normal', '너 귀찮은 거 싫어하잖아.'),
+    Y('normal', '해 보고 싶은 건 안 귀찮아.'),
+    J('shy', '그래, 해 봐. 너 그런 거 잘할 것 같아.'),
+    Y('surprised', '오. 웬일로 칭찬해?'),
+    J('annoyed', '칭찬 아니거든. 아 몰라, 늦었어. 뛰어.', { hop: true }),
+    hide('jia'),
+    Y('surprised', '야, 같이 가! 나 아까도 뛰었단 말이야!'),
+    hideAll(),
+
+    // ---- 같은 시각 ----
+    bgm('night'),
+    bg('club_room_night', 'black'),
+    place('같은 시각, YSBS 주조정실', '오전 9:00'),
+    show('seoyeon', 'center', 'normal'),
+    narr('ON AIR 불이 꺼졌다.'),
+    M('오프닝 좋던데? 깔끔하고.'),
+    SY('normal', '작년 거예요. 날짜만 바꿨어요.'),
+    M('아무도 몰라~'),
+    SY('serious', '제가 알잖아요.'),
+    narr('채연은 원고를 반으로 접어 휴지통에 넣었다.'),
+    hide('seoyeon'),
+
+    jump('ch1'),
+  ]);
+})();
+
+</script>
+<script>/* ==== js/story/chapter1.js ==== */
+/* =============================================================
+ *  CHAPTER 1 — 수습
+ *
+ *  선택지 (결과가 이후 대사·장면에 반영됨)
+ *   1. 설명회 태도      flags.q    : 'ask' | 'caught' | 'memo'
+ *   2. 방송국 드는 이유 flags.why  : 'serious' | 'fun' | 'joke'
+ *   3. 방송 연습        flags.film : 'jia' | 'dawn' | 'advice'   → 서로 다른 장면
+ *   4. 20일 금요일 저녁 flags.sat  : 'seoyeon' | 'jia' | 'both'  → 서로 다른 장면
+ *   + 호감도 조건: 채연 6 이상이면 채연이 직접 부탁(flags.asked)
+ *                 채연 10 이상이면 밤 장면에서 채연이 NG 파일을 남김
+ * ============================================================= */
+(() => {
+  const { say, narr, show, hide, hideAll, move, bg, place, chapter, choice, when, aff, set, jump, endcard, bgm, sfx } = VN.dsl;
+  const Y = (f, t, o) => say('yujin', f, t, o);
+  const J = (f, t, o) => say('jia', f, t, o);
+  const SY = (f, t, o) => say('seoyeon', f, t, o);
+  const M = (t, o) => say('minhyuk', null, t, o);
+  const G = (t, o) => say('gwadae', null, t, o);
+  const W = { whisper: true };
+  const MSG = { msg: true, as: '나은' };
+  const ON_AIR = { as: 'YSBS 점심 방송' };
+  const is = (k, v) => (s) => s.flags[k] === v;
+
+  /* ---------------------------------------------------------
+   *  설명회
+   * --------------------------------------------------------- */
+  VN.label('ch1', [
+    chapter('CHAPTER 1', '수습', ''),
+    bgm('daily'),
+    bg('hall_room', 'black'),
+    place('학생회관 204호', '3월 4일 (수) · 오후 3:58'),
+    show('yujin', 'midleft', 'normal'),
+    show('jia', 'midright', 'normal'),
+    J('normal', '미리 말하는데 나는 구경만 하는 거다. 가입 안 해.'),
+    Y('smile', '응응. 나중에 마음 바뀌지나 마.'),
+    J('annoyed', '안 바뀌어.'),
+
+    M('자, 시작할게요~ 안녕하세요, YSBS 국장 윤민혁입니다.'),
+    M('신입 교육은 아나운서부장이 해요. 채연아.'),
+    move('yujin', 'left'),
+    move('jia', 'right'),
+    show('seoyeon', 'center', 'normal'),
+    SY('normal', '아나운서부장 정채연이에요.'),
+    Y('surprised', '(어. 아침 방송 그 목소리다.)', W),
+    SY('normal', '아침, 점심 방송 매일 나가요. 축제 때도 카메라 담당 하고요. 그래서 수습 기간 동안은 좀 빡세요.'),
+    SY('serious', '방송은 한 번 나가면 못 주워 담아요. 사고 나면 다 같이 남아서 경위서 씁니다. 아침 방송 있는 날은 일곱 시 반까지 와야 하고.'),
+    narr('뒷줄에서 의자 끄는 소리가 몇 번 났다.'),
+    SY('normal', '네, 지금 나가셔도 돼요. 진짜로.'),
+    M('채연아… 겁 그만 줘...'),
+    SY('normal', '질문 받을게요.'),
+
+    // ── 선택지 1 ──────────────────────────────
+    choice('설명회 도중, 도연은—', [
+      {
+        text: '손을 들고 질문한다', aff: { seoyeon: 3 }, set: { q: 'ask' },
+        then: [
+          Y('normal', '저 기술부 하고 싶은데요, 장비를 한 번도 안 만져 봤는데 괜찮을까요?'),
+          SY('normal', '뭐 만져 본 거 있어요?'),
+          Y('smile', '아뇨, 하나도요... 근데 진짜 해 보고 싶었어요.'),
+          SY('normal', '하나도.'),
+          M('오 솔직하다.'),
+          SY('normal', '…괜찮아요. 안 해 본 사람은 이상한 버릇이 없어요. 그게 제일 가르치기 편한 거라.'),
+          Y('smile', '생각보다 친절하신데?', W),
+          J('normal', '그러게', W),
+        ],
+      },
+      {
+        text: '나은한테 몰래 속닥인다', aff: { jia: 3, seoyeon: -1 }, set: { q: 'caught' },
+        then: [
+          Y('smile', '(나은아, 아침 방송 그 사람이야.)', W),
+          J('smile', '(오, 진짜네.)', W),
+          Y('normal', '(목소리는 엄청 다정했는데 실물은 좀 무섭다.)', W),
+          SY('normal', '앞줄.'),
+          Y('surprised', '넵!', { hop: true }),
+          SY('normal', '실물이 무섭다고요?'),
+          Y('surprised', '…'),
+          SY('normal', '여기 방송국 사람들이에요. 작은 소리 잘 들어요.'),
+          narr('강의실이 웃음바다가 됐다. 나은은 책상에 이마를 박고 어깨까지 떨며 웃는다.'),
+          M('아 신입 벌써 캐릭터 잡혔네.'),
+          J('smile', '(김도연… 너 진짜 어떡하냐.)', W),
+        ],
+      },
+      {
+        text: '조용히 메모한다', aff: { seoyeon: 1, jia: 1 }, set: { q: 'memo' },
+        then: [
+          narr('도연은 휴대폰 메모장을 열었다. \'아침 7:30\', \'사고 나면 경위서\'...'),
+          J('surprised', '(필기를 해?)', W),
+          Y('smile', '(나 원래 이런 사람이야.)', W),
+          J('smile', '(고3 때 맨날 내 필기 사진 찍어 간 사람 누구더라.)', W),
+          Y('annoyed', '(그건 전략이었어.)', W),
+        ],
+      },
+    ]),
+
+    SY('normal', '지원서는 방송국 앞 박스에. 끝.'),
+    hide('seoyeon'),
+    M('많이 지원해줘요~'),
+
+    /* -------- 벤치 -------- */
+    bg('bench', 'black'),
+    place('학생회관 앞 벤치', '오후 4:20'),
+    show('yujin', 'midleft', 'normal'),
+    show('jia', 'midright', 'normal'),
+    J('surprised', '12분 걸렸어. 설명회가.'),
+    Y('smile', '근데 좀 멋있지 않았어? 할 말만 딱.'),
+    J('normal', '멋있긴 한데 좀 무서워.'),
+    when(is('q', 'caught'), [
+      J('smile', '너 \'넵!\' 하는 거 진짜… 그거 녹음해 놨어야 됐는데.'),
+      Y('annoyed', '하지 마아. 나 아직도 귀 뜨거워.'),
+      J('smile', '보여 줘 봐. 어 진짜 빨개.'),
+    ]),
+    when(is('q', 'ask'), [
+      J('smile', '왜 이렇게 솔직하게 말했어. 다 쳐다봤잖아.'),
+      Y('smile', '솔직한 게 내 장점인데 어떡해.'),
+      J('smile', '장점은 무슨. 아 진짜 웃겨.'),
+    ]),
+    J('normal', '그래서. 진짜 들 거야?'),
+    Y('normal', '응.'),
+    J('serious', '왜?'),
+
+    // ── 선택지 2 ──────────────────────────────
+    choice('"왜?" — 나은이 웬일로 진지하게 묻는다.', [
+      {
+        text: '"올해는 진짜 뭔가 해 보고 싶어서."', aff: { jia: 3 }, set: { why: 'serious' },
+        then: [
+          Y('serious', '1학년 때 설계실이랑 집만 왔다 갔다 했잖아. 5년 내내 그러면 좀 억울할 것 같아.'),
+          J('surprised', '…'),
+          J('smile', '뭐야. 멋있는 척.'),
+          Y('smile', '척 아닌데?'),
+          J('smile', '알았어 알았어. 멋있다 김도연.'),
+        ],
+      },
+      {
+        text: '"그냥? 재밌을 것 같아서!"', aff: { jia: 1 }, set: { why: 'fun' },
+        then: [
+          Y('smile', '그냥? 재밌을 것 같아서!'),
+          J('smile', '너 1학년 때 클라이밍도 재밌을 것 같다 했어.'),
+          Y('annoyed', '그건 손바닥이 다 까졌단 말이야.'),
+          J('smile', '세 번 갔지.'),
+          Y('normal', '두 번 반.'),
+          J('smile', '반은 뭔데. 아 진짜 웃겨.'),
+        ],
+      },
+      {
+        text: '"너 말고 다른 친구도 좀 사귀려고ㅋㅋ"', set: { why: 'joke' },
+        then: [
+          Y('smile', '너 말고 다른 친구도 좀 사귀려고ㅋㅋ'),
+          J('surprised', '…'),
+          J('smile', '와. 서운하다?'),
+          Y('smile', '농담이지이. 너가 1순위야. 평생.'),
+          J('smile', '알아. 나도 장난이야.'),
+        ],
+      },
+    ]),
+
+    J('normal', '아 맞다. 20일 금요일 개총 와.'),
+    Y('surprised', '개총? 나 작년에도 한 번밖에 안 갔는데.'),
+    J('normal', '그니까. 과대 언니가 너 꼭 데려오래.'),
+    Y('surprised', '왜 나를?'),
+    J('smile', '너 얼굴 까먹을 것 같대. 언니가 너 예뻐하시잖아.'),
+    Y('annoyed', '…난 아무것도 안하는데 왜 예뻐하는거야'),
+    J('normal', '그리고 나 혼자 가면 심심하단 말이야. 와, 꼭?'),
+    Y('smile', '알았어 알았어. 갈게.'),
+    hideAll(),
+
+    /* -------- 첫 모임 -------- */
+    bg('club_room', 'black'),
+    place('YSBS 방송국', '3월 6일 (금) · 오후 6:30'),
+    narr('첫 모임. 방송국 안은 케이블 뭉치랑 컵라면 냄새, 그리고 신입 열댓 명으로 꽉 찼다.'),
+    M('신입분들 환영해요~ 설명회 듣고 도망 안 간 거 대단하다. 박수.'),
+    show('seoyeon', 'center', 'normal'),
+    SY('normal', '다음 주부터 신입은 점심 방송에 한 명씩 들어가요.'),
+    SY('normal', '아나운서부는 옆에서 멘트 보고, 기술부는 콘솔 보조. 큐 시트대로 음악 올리고 내리는 거예요.'),
+    M('쉬워요. 버튼 몇 개만 누르면 돼요. 근데 틀리면 학교 전체가 들어요.'),
+    SY('annoyed', '오빠 겁 주지 마요.'),
+
+    when(is('q', 'caught'), [
+      move('seoyeon', 'midright'),
+      show('yujin', 'midleft', 'normal', { from: 'left' }),
+      SY('normal', '저 오늘도 무섭나요? 이름이?'),
+      Y('surprised', '…김도연입니다. 죄송합니다.'),
+      SY('normal', '월요일 점심, 기술부 첫 순서예요.'),
+    ]),
+    when(is('q', 'ask'), [
+      move('seoyeon', 'midright'),
+      show('yujin', 'midleft', 'normal', { from: 'left' }),
+      SY('normal', '하나도 안 해 봤다던 분.'),
+      Y('surprised', '…네. 기억하세요?'),
+      SY('normal', '설명회에서 질문한 사람이 한 명이라.'),
+      SY('normal', '월요일 점심 첫 순서예요. 큐 시트 미리 보고 와요.'),
+      Y('smile', '넵. 볼게요.'),
+      M('와. 정채연이 신입한테 설명을 해 줘? 두 줄이나?'),
+      SY('annoyed', '오빤 컵라면이나 먹어요.'),
+    ]),
+    when(is('q', 'memo'), [
+      narr('채연은 신입 명단을 넘기다가, 도연의 이름 옆에 펜으로 점 하나를 찍었다.'),
+      narr('순서표 맨 위, 3월 9일 월요일 칸에 도연의 이름이 적혀 있었다.'),
+    ]),
+    SY('normal', '질문 없으면 해산.'),
+    hideAll(),
+
+    /* -------- 첫 점심 방송 -------- */
+    bgm('night'),
+    bg('club_room_night', 'black'),
+    place('YSBS 주조정실 · 점심 방송', '3월 9일 (월) · 오후 12:28'),
+    show('yujin', 'midleft', 'normal'),
+    show('seoyeon', 'midright', 'normal'),
+    narr('방송 2분 전. 콘솔 위엔 큐 시트 한 장, 도연 손엔 땀.'),
+    M('신입, 큐 시트 봤지? 오프닝 곡, 멘트, 사연, 신청곡. 순서대로만 하면 돼.'),
+    Y('normal', '넵. 다 외웠어요.'),
+    SY('normal', '내가 손 들면 올려요.'),
+    sfx('onair'),
+    narr('ON AIR.'),
+    say('seoyeon', null, '안녕하세요, YSBS 점심 방송입니다. 오늘 첫 곡 들어 볼게요.', ON_AIR),
+    narr('채연이 손을 들었다. 도연은 큐 시트에서 다음 줄을 찾고 있었다.'),
+    narr('1초. 2초. 3초. 학교 전체 스피커에서 아무 소리도 나지 않았다.'),
+    say('seoyeon', null, '…음악이 오늘 좀 수줍네요. 다시 들어 볼게요.', ON_AIR),
+    narr('도연이 허겁지겁 페이더를 밀어 올렸다. 노래가 너무 크게 터져 나왔다.'),
+    SY('annoyed', '(줄여요, 줄여.)', W),
+    narr('나머지 25분은 어떻게 지나갔는지 기억나지 않았다.'),
+    SY('normal', '무음 3초.'),
+    Y('sad', '…죄송합니다.'),
+    SY('normal', '라디오에서 3초면 길어요. 듣는 사람은 사고 난 줄 알아요.'),
+    M('괜찮아 괜찮아. 나는 첫날 애국가 틀었어.'),
+    SY('annoyed', '오빠는 그게 자랑이에요?'),
+    SY('normal', '금요일 점심에 한 번 더 들어가요. 그때 안 끊기면 돼요.'),
+    hideAll(),
+
+    /* -------- 학식 -------- */
+    bgm('daily'),
+    bg('cafeteria', 'black'),
+    place('학생식당', '오후 1:10'),
+    show('yujin', 'midleft', 'sad'),
+    show('jia', 'midright', 'normal'),
+    J('normal', '들었어. 점심 방송.'),
+    Y('sad', '…학교 전체가 들었지.'),
+    J('smile', '다들 밥 먹느라 몰랐어. 진짜로.'),
+    Y('annoyed', '너는 알았잖아.'),
+    J('normal', '나는 너 첫 방송이라 귀 대고 들었으니까.'),
+    narr('나은이 자기 접시의 돈가스 한 조각을 도연 쪽으로 밀었다.'),
+    Y('surprised', '어? 안 먹어?'),
+    J('normal', '배불러.'),
+    Y('smile', '…너는 맨날 배부르더라.'),
+    J('normal', '금요일에 또 한다며. 연습할 데는 있어?'),
+    when(is('why', 'joke'), [
+      J('smile', '연습 상대 필요하면 다른 친구한테 부탁하기 전에 말하고.'),
+      Y('smile', '아 그거 농담이었다니까아.'),
+      J('smile', '알아. 나도 농담.'),
+    ]),
+
+    // ── 선택지 3 ──────────────────────────────
+    choice('금요일 방송 전까지, 어떻게 할까?', [
+      {
+        text: '나은한테 연습 상대를 부탁한다', aff: { jia: 4 }, set: { film: 'jia' },
+        then: [
+          Y('smile', '그럼 너가 DJ 해 줘. 오늘 저녁에.'),
+          J('surprised', '내가?'),
+          Y('smile', '응. 너가 멘트 읽으면 내가 음악 트는 거야. 커피 살게.'),
+          J('smile', '그래!'),
+        ],
+        jump: 'ch1_film_jia',
+      },
+      {
+        text: '아침 방송에 일찍 가서 보고 배운다', set: { film: 'dawn' },
+        then: [
+          Y('normal', '아냐, 아침 방송 하는 거 구경 가 볼래. 직접 보면 좀 알 것 같아.'),
+          J('surprised', '일곱 시 반이라며. 너가?'),
+          Y('smile', '알람 여섯 개 맞출 거야.'),
+          J('smile', '다섯 개 끈 사람이 할 소리야?'),
+        ],
+        jump: 'ch1_film_dawn',
+      },
+      {
+        text: '부장한테 뭐가 문제였는지 물어본다', set: { film: 'advice' },
+        then: [
+          Y('normal', '그 부장 선배한테 물어볼까. 뭘 잘못한 건지.'),
+          J('normal', '무섭다며.'),
+          Y('normal', '무섭긴 한데 제일 잘 알 거 아냐.'),
+          J('normal', '그 국장 선배도 있잖아.'),
+          Y('normal', '아... 그 선배는 그냥 별로.'),
+        ],
+        jump: 'ch1_film_advice',
+      },
+    ]),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  3-A. 나은과 카페 — 연습 상대
+   * --------------------------------------------------------- */
+  VN.label('ch1_film_jia', [
+    bgm('heart'),
+    bg('campus_cafe', 'black'),
+    place('학교 앞 카페', '3월 9일 (월) · 오후 7:10'),
+    show('yujin', 'midleft', 'normal'),
+    show('jia', 'midright', 'normal'),
+    J('normal', '큐 시트 줘 봐. 내가 멘트 읽으면 되지?'),
+    Y('normal', '응. 너가 \'들어 볼게요\' 하면 내가 노래 트는 거야.'),
+    Y('normal', '이어폰 한쪽 껴. 의자 붙이고.'),
+    narr('나은이 의자를 끌고 왔다. 이어폰 줄이 짧아서 어깨가 닿았다.'),
+    J('normal', '…시작한다.'),
+    J('normal', '안녕하세요, YSBS 점심 방송입니다. 오늘 첫 곡 들어 볼게요.'),
+    narr('도연이 재생 버튼을 눌렀다. 딱 맞았다.'),
+    J('smile', '오. 안 끊겼다.'),
+    Y('smile', '한 번 더.'),
+    narr('열 번째쯤 되자 나은은 큐 시트를 안 보고 멘트를 했다.'),
+    J('smile', '다음 곡 들어 볼게요. 신청하신 분은… 김도연 씨네요. 설계 과제 언제 끝나냐고요.'),
+    Y('smile', '그건 큐 시트에 없잖아.'),
+    J('smile', '애드리브야. 채연 선배도 하던데.'),
+    Y('surprised', '너 목소리 라디오 체질이다.'),
+    J('surprised', '…'),
+    J('shy', '…뭐래. 노래나 틀어.'),
+    narr('도연이 재생 버튼을 눌렀다. 이번엔 1초 늦었다.'),
+    J('smile', '늦었어.'),
+    Y('annoyed', '너 때문이잖아.'),
+    J('smile', '내가 뭘.'),
+    Y('normal', '열한 번째. 다시.'),
+    J('smile', '…응. 몇 번이든.'),
+    hideAll(),
+    jump('ch1_screening'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  3-B. 아침 방송국 — 채연의 발성 연습
+   * --------------------------------------------------------- */
+  VN.label('ch1_film_dawn', [
+    bgm('night'),
+    bg('club_room_night', 'black'),
+    place('YSBS 주조정실', '3월 11일 (수) · 오전 6:50'),
+    narr('방송국 문이 조금 열려 있었다. 안에서 목소리가 들렸다.'),
+    say('seoyeon', null, '경찰청 철창살은 외철창살이냐 쌍철창살이냐. 경찰청 철창살은—', { as: '???' }),
+    show('yujin', 'left', 'surprised'),
+    Y('surprised', '(…철창살?)', W),
+    show('seoyeon', 'right', 'normal'),
+    SY('normal', '아, 에, 이, 오, 우. 아, 에, 이—'),
+    SY('surprised', '…'),
+    move('yujin', 'midleft'),
+    move('seoyeon', 'midright'),
+    SY('surprised', '언제부터 있었어요?'),
+    Y('smile', '철창살부터요.'),
+    SY('annoyed', '…거의 처음부터네.'),
+    Y('smile', '이런 게 진짜 도움이 돼요?'),
+    SY('normal', '안 하면 첫 문장에서 혀 꼬여요. 아침엔 특히.'),
+    SY('normal', '근데 신입이 이 시간에 왜 왔어요.'),
+    Y('normal', '월요일에 실수했잖아요. 하는 거 직접 보면 좀 알 것 같아서요.'),
+    M('채연아 미안 나 버스 놓쳤어 20분 늦을 듯ㅠ', { msg: true, as: '민혁 · 메시지' }),
+    SY('annoyed', '…미치셨나.'),
+    SY('normal', '김도연 씨. 오늘 페이더 해요.'),
+    Y('surprised', '저요? 저 월요일에 사고 낸 사람인데요?!'),
+    SY('normal', '어쩔 수 없어요. 오늘은 종이 말고 나를 봐요. 내가 손 들면 올리고, 내리면 내리면 돼요.'),
+    SY('normal', '일곱 시 반. 시작해요.'),
+    sfx('onair'),
+    narr('ON AIR 불이 켜졌다. 채연이 손을 들었다. 도연은 숨을 참고 페이더를 밀어 올렸다.'),
+    say('seoyeon', null, '좋은 아침입니다. YSBS 아침 방송, 정채연입니다.', { as: 'YSBS 아침 방송' }),
+    narr('멘트를 하던 채연이 한 번 도연 쪽을 봤다. 도연은 엄지를 들어 보였다. 채연이 고개를 홱 돌렸다.'),
+    narr('그때 도연의 주머니에서 휴대폰이 진동했다.'),
+    J('normal', '일어났어?? 오늘 아침에 방송국 간다며', MSG),
+    J('normal', '거기 춥대. 핫팩 가방 앞주머니에 넣어 놨어', MSG),
+    J('normal', '두 개!', MSG),
+    narr('방송이 끝나고 ON AIR 불이 꺼졌다.'),
+    SY('normal', '…방송 중에 엄지 들지 마요.'),
+    Y('smile', '아까 웃을 뻔한 거 맞죠?'),
+    SY('annoyed', '안 웃었어요.'),
+    Y('smile', '아 그리고 이거요. 친구가 두 개 넣어 줬어요. 하나 쓰세요.'),
+    SY('surprised', '…'),
+    SY('normal', '…고마워요.'),
+    set({ hotpack: true }),
+    aff({ seoyeon: 4 }),
+    hideAll(),
+    jump('ch1_screening'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  3-C. 밤의 주조정실 — 물어보러 감
+   * --------------------------------------------------------- */
+  VN.label('ch1_film_advice', [
+    bgm('night'),
+    bg('club_room_night', 'black'),
+    place('YSBS 주조정실', '3월 10일 (화) · 오후 7:15'),
+    show('seoyeon', 'center', 'serious'),
+    narr('주조정실엔 채연 혼자였다. 헤드폰을 낀 채 큐 시트에 빨간 펜으로 뭔가 적고 있었다.'),
+    move('seoyeon', 'midright'),
+    show('yujin', 'midleft', 'normal', { from: 'left' }),
+    Y('normal', '선배, 혹시 잠깐 시간 되세요?'),
+    SY('normal', '안 돼요.'),
+    Y('normal', '아… 네. 죄송합니다.'),
+    narr('도연이 꾸벅 인사하고 돌아섰다.'),
+    SY('annoyed', '…진짜 가네.'),
+    SY('normal', '월요일 거 때문에 온 거죠. 와 봐요.'),
+    Y('normal', '네. 저 뭘 잘못한 거예요? 큐 시트는 다 외웠는데.'),
+    SY('normal', '그래서 큐 시트만 봤잖아요.'),
+    Y('surprised', '…'),
+    SY('normal', '내가 손 들었을 때 어디 보고 있었어요?'),
+    Y('normal', '…종이요.'),
+    SY('normal', '그거 알았으면 됐어요.'),
+    Y('surprised', '그게 다예요?'),
+    SY('normal', '나머지는 금요일에 직접 해 봐요.'),
+    narr('채연은 다시 헤드폰을 썼다.'),
+    narr('도연이 문고리를 잡았다.'),
+    SY('normal', '그리고 김도연 씨.'),
+    Y('surprised', '네?'),
+    SY('normal', '겉옷 입고 다녀요. 3월에 반팔은 좀.'),
+    Y('smile', '아… 오늘 낮엔 더웠어서...'),
+    SY('annoyed', '지금은 밤이잖아요.'),
+    hideAll(),
+
+    bg('design_studio', 'black'),
+    place('건축관 4층 설계실', '3월 11일 (수) · 오전 2:40'),
+    show('yujin', 'midleft', 'normal'),
+    show('jia', 'midright', 'normal'),
+    narr('새벽 두 시 사십 분. 설계실엔 모형 만드는 칼 소리만 났다.'),
+    Y('annoyed', '종이 말고 사람… 종이 말고 사람…'),
+    J('normal', '뭐야, 아까부터 혼잣말.'),
+    Y('normal', '방송 얘기. 큐 시트만 보지 말고 선배를 보래.'),
+    J('normal', '음.'),
+    J('normal', '그럼 연습하자. 내가 손 들면 너 그 스탠드 켜.'),
+    narr('그날 새벽, 나은은 모형을 자르다가 아무 때나 손을 들었다. 도연은 그때마다 스탠드를 켰다.'),
+    J('smile', '열세 번 중에 열두 번. 늦은 한 번은 너 졸았어.'),
+    Y('smile', '나은아 너 천재야.'),
+    J('smile', '…알아.'),
+    aff({ seoyeon: 3, jia: 1 }),
+    hideAll(),
+    jump('ch1_screening'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  두 번째 점심 방송 — 선택지 3의 결과에 따라 달라짐
+   * --------------------------------------------------------- */
+  VN.label('ch1_screening', [
+    bgm('daily'),
+    bg('club_room_night', 'black'),
+    place('YSBS 주조정실 · 점심 방송', '3월 13일 (금) · 오후 12:28'),
+    show('yujin', 'midleft', 'normal'),
+    show('seoyeon', 'midright', 'normal'),
+    M('신입 두 번째 판. 오늘은 무음 없기다?'),
+    Y('normal', '…넵.'),
+    sfx('onair'),
+    narr('ON AIR.'),
+    say('seoyeon', null, '안녕하세요, YSBS 점심 방송입니다. 오늘 첫 곡 들어 볼게요.', ON_AIR),
+
+    when(is('film', 'jia'), [
+      narr('\'들어 볼게요.\' 나은 목소리로 열한 번 들은 말이었다. 채연의 손이 올라가기 전에, 도연 손이 먼저 움직였다.'),
+      narr('음악이 딱 맞게 들어갔다.'),
+      M('오 신입 오늘 깔끔!'),
+      SY('normal', '…내 손보다 먼저 올렸네요.'),
+      Y('smile', '연습했어요. 같은 과 친구가 DJ 해 줬어요.'),
+      SY('normal', '그 친구, 말 템포가 나랑 비슷했나 봐요.'),
+      Y('smile', '열한 번 했거든요.'),
+      M('얘 원래 칭찬을 이렇게 해. 돌려서.'),
+      SY('annoyed', '칭찬 아니에요.'),
+      aff({ seoyeon: 1 }),
+    ]),
+    when(is('film', 'dawn'), [
+      narr('채연이 손을 들었다. 도연은 종이 대신 채연을 보고 있었다. 수요일 아침처럼.'),
+      narr('음악이 딱 맞게 들어갔다.'),
+      M('오 신입 오늘 깔끔! 채연아 너랑 손발 맞는데?'),
+      M('…잠깐. 수요일 아침 페이더 너였어? 나 늦은 날?'),
+      Y('smile', '네. 선배가 시켰어요.'),
+      SY('annoyed', '…일손이 없었어요.'),
+      SY('normal', '오늘 잘했어요.'),
+      M('헐 채연이가 칭찬을 했어. 녹음할걸.'),
+      SY('annoyed', '오빠 조용히 해요.'),
+      aff({ seoyeon: 3 }),
+    ]),
+    when(is('film', 'advice'), [
+      narr('채연이 손을 들었다. 도연은 종이가 아니라 채연을 보고 있었다.'),
+      narr('음악이 딱 맞게 들어갔다.'),
+      M('오 신입 오늘 깔끔!'),
+      SY('normal', '…어디 봤어요?'),
+      Y('smile', '선배요.'),
+      SY('surprised', '…'),
+      SY('normal', '…좋아요.'),
+      M('헐. 채연이가 \'좋아요\'래. 오늘 무슨 날이야.'),
+      SY('annoyed', '오빠 조용히 해요.'),
+      aff({ seoyeon: 2 }),
+    ]),
+
+    narr('사연 코너 직전. 배경음 파일이 재생되다 뚝 멈췄다. 콘솔 모니터에 빨간 글씨가 떴다.'),
+    Y('serious', '(또 3초—)', W),
+    narr('도연은 예비 채널의 피아노 곡을 올렸다. 월요일 이후로 큐 시트 맨 아래에 직접 적어 둔 곡이었다.'),
+    narr('채연은 멘트를 멈추지 않았다. 다만 한 문장이 끝날 때, 처음으로 콘솔 쪽을 봤다.'),
+    narr('방송이 끝났다.'),
+    SY('normal', '아까 피아노. 큐 시트에 없던데.'),
+    Y('normal', '월요일에 끊기고 나서요. 또 끊기면 틀려고 하나 적어 놨어요.'),
+    SY('normal', '…'),
+    SY('normal', '다음 주 점심도 들어와요. 순서 아니어도.'),
+    M('어? 순서표 짠 사람이 순서를 무시하네?'),
+    SY('annoyed', '일 잘하는 사람 쓰는 거예요.'),
+    Y('smile', '(…방금 그거, 칭찬 맞지?)', W),
+    narr('채연은 큐 시트 맨 아래 적힌 곡 제목을 자기 수첩에 옮겨 적었다. 민혁이 큐 시트를 걷으며 말했다.'),
+    M('아 공지! 다음 주 금요일, 20일 저녁에 개국기념 특집 녹음해요. 채연이 졸업 전 마지막 특집. 기술부 보조 한 명 구해요.'),
+    M('부스가 금요일 밤에만 비어서 저녁 여섯 시부터 늦게까지 해요. 저는 알바라 못 가요. 미안 채연아.'),
+    SY('normal', '알아요.'),
+    Y('surprised', '(20일 금요일… 개총이다.)', W),
+
+    when((s) => s.aff.seoyeon >= 6, [
+      set({ asked: true }),
+      SY('normal', '…김도연 씨. 시간 돼요?'),
+      Y('surprised', '저요?', { hop: true }),
+      when(is('film', 'dawn'),
+        [SY('normal', '페이더 올릴 줄 아는 신입이 한 명밖에 없어서.')],
+        [SY('normal', '모르는 거 물어볼 줄 아는 사람이 필요해서요.')]),
+    ], [
+      narr('채연은 대답 없이 큐 시트를 정리했다. 단톡에 올리면 누가 하겠지, 하는 얼굴이었다.'),
+    ]),
+    narr('도연은 휴대폰을 만지작거렸다. 단톡방 공지가 떠 있었다. \'20일(금) 7시 개강총회 — 과대\'.'),
+
+    // ── 선택지 4 ──────────────────────────────
+    choice('20일 금요일 저녁, 어떻게 할까?', [
+      {
+        text: (s) => (s.flags.asked ? '"할게요." — 선배의 녹음을 돕는다' : '"제가 할게요." — 보조에 자원한다'),
+        aff: { seoyeon: 4 }, set: { sat: 'seoyeon' },
+        then: [
+          Y('serious', (s) => (s.flags.asked ? '할게요. 아니, 하고 싶어요.' : '저 할게요.')),
+          when((s) => !s.flags.asked, [
+            SY('surprised', '…'),
+            SY('normal', '금요일 밤인데, 시간 괜찮아요?'),
+            Y('smile', '괜찮아요.'),
+          ]),
+          SY('normal', '…좋아요. 여섯 시, 방송국.'),
+          M('오~ 채연이 조수 생겼다.'),
+          SY('annoyed', '보조예요.'),
+          hideAll(),
+
+          bg('bench', 'black'),
+          place('학생회관 앞 벤치', '오후 8:10'),
+          show('yujin', 'midleft', 'normal'),
+          show('jia', 'midright', 'normal'),
+          Y('normal', '나은아… 20일 말인데.'),
+          J('normal', '응.'),
+          Y('normal', '그날 방송국 특집 녹음 보조 하기로 했어. 밤늦게까지래.'),
+          J('surprised', '아.'),
+          J('smile', (s) => (s.flags.asked ? '야, 가야지. 그 부장 선배가 직접 부른 거잖아.' : '너가 먼저 한다고 했어? 와. 김도연 많이 컸다.')),
+          Y('normal', '과대 언니한테는 내가 말할게. 미안해.'),
+          J('smile', '괜찮아. 내가 잘 말해 둘게. 언니가 좀 서운해하긴 하겠다.'),
+          J('normal', '…나도 좀.'),
+          Y('surprised', '응?'),
+          J('smile', '아냐. 잘하고 와.'),
+          hideAll(),
+        ],
+      },
+      {
+        text: (s) => (s.flags.asked ? '"죄송해요, 그날은 과 행사가 있어서요."' : '모른 척한다 — 개총 가기로 했으니까'),
+        aff: { jia: 4 }, set: { sat: 'jia' },
+        then: [
+          when((s) => s.flags.asked, [
+            Y('normal', '죄송해요. 그날 과 개강총회가 있어서요.'),
+            SY('normal', '그래요. 가야죠, 그런 건.'),
+            SY('normal', '오빠, 3학년 단톡에 올려 줘요.'),
+            M('넵넵.'),
+            narr('채연은 노트북을 덮었다. 소리가 평소보다 조금 컸다.'),
+          ], [
+            narr('도연은 아무 말도 하지 않았다. 나은한테 간다고 했으니까.'),
+            SY('normal', '오빠, 3학년 단톡에 올려 줘요.'),
+            M('넵넵.'),
+          ]),
+          hideAll(),
+        ],
+      },
+      {
+        text: '"아홉 시까지만 도울게요." — 끝나고 개총에 합류한다',
+        aff: { seoyeon: 2, jia: 2 }, set: { sat: 'both' },
+        then: [
+          Y('normal', (s) => (s.flags.asked
+            ? '할게요! 근데 그날 과 개총이 있어서… 아홉 시까지만 돼도 괜찮을까요?'
+            : '저 할 수 있어요. 근데 과 개총이 있어서 아홉 시까지만…')),
+          SY('normal', '음 여덟 시 반까지. 그 이상 안 잡을게요.'),
+          Y('smile', '감사합니다!'),
+          hideAll(),
+        ],
+      },
+    ]),
+
+    when(is('sat', 'seoyeon'), [jump('ch1_sat_seoyeon')]),
+    when(is('sat', 'jia'), [jump('ch1_sat_jia')]),
+    jump('ch1_sat_both'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  4-A. 금요일 밤 — 채연의 특집 녹음
+   * --------------------------------------------------------- */
+  VN.label('ch1_sat_seoyeon', [
+    bgm('night'),
+    bg('booth', 'black'),
+    place('YSBS 녹음 부스', '3월 20일 (금) · 오후 10:40'),
+    show('yujin', 'midleft', 'normal'),
+    show('seoyeon', 'midright', 'serious'),
+    SY('serious', '레벨 조금만 내려요. 아니 너무 내렸어. 거기.'),
+    Y('normal', '선배, 이거 언제 나가요?'),
+    SY('normal', '5월 개국기념일. 한 시간짜리예요.'),
+    SY('normal', '나 이번 학기가 마지막이라. 내 이름 걸고 하는 특집은 이게 마지막이에요.'),
+    Y('normal', '그래서 이렇게 늦게까지 하는 거예요?'),
+    SY('normal', '부스가 금요일 밤에만 비어서요. 다른 날은 다들 연습하거든요.'),
+    Y('smile', '그럼 오늘은 선배가 전세 낸 거네요.'),
+    SY('annoyed', '헤드폰이나 써요.'),
+    narr('주머니에서 휴대폰이 연달아 울렸다.'),
+    J('normal', '[사진]', MSG),
+    J('normal', '과대 언니가 너 없다고 나만 붙잡고 너 얘기만 해ㅋㅋ', MSG),
+    J('normal', '녹음 잘해!! 끝나면 연락해', MSG),
+    SY('normal', '…오늘 뭐 있었어요?'),
+    Y('normal', '아, 과 개총이요. 괜찮아요.'),
+    SY('surprised', '…'),
+    SY('normal', '그럼 빨리 끝내요. 오프닝 갈게요.'),
+    SY('normal', '안녕하세요, YSBS 개국기념 특집, 백서—'),
+    SY('annoyed', '…다시.'),
+    SY('normal', '안녕하세요, YSBS 개국기념—'),
+    SY('annoyed', '아 왜 이러지. 다시.'),
+    Y('surprised', '선배 아침 방송은 맨날 한 번에 하잖아요.'),
+    SY('sad', '그건 매일 하는 거고. 이건 마지막이잖아.'),
+    Y('normal', '…'),
+    Y('normal', '그럼 저 보고 해요.'),
+    SY('surprised', '뭐요?'),
+    Y('smile', '부스 밖에 저 혼자 있잖아요. 듣는 사람 한 명이라고 치고요.'),
+    SY('surprised', '…'),
+    when((s) => s.flags.hotpack, [
+      Y('smile', '아 그리고 손 차가우면 혀도 굳어요. 저번에 드린 핫팩 같은 거 또 있어요.'),
+      SY('normal', '…그 친구가 또 넣어 줬어요?'),
+      Y('smile', '네. 이번에도 두 개요.'),
+    ]),
+    narr('채연이 도연을 봤다. 숨을 한 번 골랐다.'),
+    SY('normal', '안녕하세요. YSBS 개국기념 특집, 정채연입니다.'),
+    narr('채연은 끝까지 한 번도 틀리지 않았다.'),
+    SY('normal', 'OK 컷. …고마워요.'),
+    Y('smile', '녹음 도와준 거요?'),
+    SY('normal', '아뇨. 들어 준 거요.'),
+    hideAll(),
+    jump('ch1_night'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  4-B. 금요일 — 개강총회
+   * --------------------------------------------------------- */
+  VN.label('ch1_sat_jia', [
+    bgm('daily'),
+    bg('pub', 'black'),
+    place('학교 앞 호프집 · 건축학과 개강총회', '3월 20일 (금) · 오후 7:20'),
+    show('jia', 'midright', 'normal'),
+    show('yujin', 'midleft', 'smile', { from: 'left' }),
+    G('어머 김도연! 진짜 왔네? 실존 인물이었어?'),
+    Y('smile', '언니 저 실존해요…'),
+    G('나은이 꼭 데려온다더니. 나은 최고. 자, 일단 앉아.'),
+    J('smile', '거봐. 언니가 너 보고 싶어 했다니까.'),
+    when((s) => s.flags.asked, [
+      J('normal', '근데 너 그 부장 선배가 직접 부탁한 거 거절했다며. 괜찮아?'),
+      Y('normal', '응. 너랑 먼저 약속했잖아.'),
+      J('shy', '…그건 그냥 오라고 한 거지.'),
+      Y('smile', '나는 그냥 한 말도 다 기억하는데?'),
+      J('shy', '…안주나 먹어.'),
+    ]),
+    narr('나은이 계란말이 제일 가운데 조각을 도연 앞 접시에 먼저 올렸다.'),
+    G('근데 너네 둘 맨날 붙어 다니더라. 사귀어?'),
+    J('surprised', '네?!', { hop: true }),
+    Y('smile', '아 저희 8년 친구예요~ 중학교 때부터.'),
+    G('아 친구구나~'),
+    J('normal', '…네. 친구예요.'),
+    narr('나은은 맥주잔을 들고 한참 동안 마셨다. 반도 안 줄었다.'),
+    when(is('film', 'jia'), [
+      J('normal', '오늘 점심 방송 들었어. 안 끊기더라.'),
+      Y('smile', '너 덕분이야. DJ 나은.'),
+      J('smile', '헐. 나 밥값 받아야겠다.'),
+      Y('normal', '선배가 말 템포가 자기랑 비슷했냐고 물어봤어.'),
+      J('smile', '그거 칭찬이지?'),
+      Y('smile', '다음에도 연습 상대 해 줄 거지?'),
+      J('shy', '…커피 사면.'),
+      Y('smile', '열 잔 사줄게'),
+    ]),
+    when(is('why', 'joke'), [
+      J('normal', '그래서 다른 친구는 좀 생겼어?'),
+      Y('normal', '음… 방송국 국장 선배? 엄청 잘 챙겨 줘.'),
+      J('smile', '그래? 다행이네.'),
+      J('normal', '…진짜 다행이다.'),
+    ]),
+    G('자자, 짠 한번 하자! 올해 우리 과 잘해 보자!'),
+    Y('smile', '짠!'),
+    J('smile', '…짠.'),
+    hideAll(),
+    jump('ch1_night'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  4-C. 금요일 — 녹음 후 개총 합류
+   * --------------------------------------------------------- */
+  VN.label('ch1_sat_both', [
+    bgm('night'),
+    bg('booth', 'black'),
+    place('YSBS 녹음 부스', '3월 20일 (금) · 오후 8:25'),
+    show('yujin', 'midleft', 'normal'),
+    show('seoyeon', 'midright', 'serious'),
+    narr('여섯 시부터 두 시간 반. 큐 시트, 레벨, 다시 레벨.'),
+    SY('normal', '오케이. 여기까지.'),
+    Y('surprised', '어? 아직 8시 25분인데요.'),
+    SY('normal', '5분 일찍 보내 주는 거예요. 개총 늦지 마요.'),
+    Y('normal', '선배는요?'),
+    SY('normal', '원래 혼자 하던 거예요. 가요.'),
+    Y('smile', '그럼 다음엔 끝까지 있을게요!'),
+    SY('surprised', '…'),
+    SY('annoyed', '빨리 가라니까요.'),
+    hideAll(),
+
+    bgm('daily'),
+    bg('pub', 'black'),
+    place('학교 앞 호프집 · 개강총회 2차', '오후 9:10'),
+    show('yujin', 'midleft', 'normal'),
+    show('jia', 'midright', 'normal'),
+    J('smile', '왔다! 여기 여기. 자리 맡아 놨어.'),
+    G('도연도연~ 이제 왔어? 녹음하고 왔다며, 봐준다.'),
+    Y('smile', '역시 우리 나은… 언니도 감사해요…'),
+    narr('나은 옆자리 앞 접시엔 계란말이랑 감자튀김이 따로 덜어져 있었다.'),
+    Y('surprised', '이거 내 거야?'),
+    J('normal', '너 오면 다 없을까 봐.'),
+    narr('도연은 감자튀김 세 개를 먹고, 나은 어깨에 머리를 기댄 채 잠들었다.'),
+    J('surprised', '…도연아?'),
+    G('어머, 잠들었네. 나은아 어깨 안 아파?'),
+    J('normal', '…괜찮아요.'),
+    G('괜찮긴. 얼굴 빨간데?'),
+    J('shy', '술 마셔서 그래요.'),
+    Y('normal', '…나은아… 계란말이…', W),
+    J('smile', '…자면서도 먹는 얘기야.'),
+    narr('나은은 어깨를 내려 주지 않았다. 2차가 끝날 때까지.'),
+    hideAll(),
+    jump('ch1_night'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  그날 밤 — 두 사람의 시점
+   * --------------------------------------------------------- */
+  VN.label('ch1_night', [
+    bgm('night'),
+    bg('jia_room', 'black'),
+    place('그날 밤, 나은의 방', '오전 1:10'),
+    show('jia', 'center', 'normal'),
+    when(is('sat', 'seoyeon'), [
+      narr('보낸 메시지 옆의 1이 사라지지 않았다.'),
+      J('normal', '…녹음 중이겠지.'),
+    ]),
+    when(is('sat', 'jia'), [
+      J('normal', '\'친구예요\'.'),
+      J('sad', '맞는 말인데. 내가 그렇게 대답했는데.'),
+    ]),
+    when(is('sat', 'both'), [
+      J('shy', '계란말이…'),
+      J('smile', '아 진짜. 자면서도.'),
+    ]),
+    when(is('film', 'jia'), [
+      J('shy', '\'라디오 체질\'이래.'),
+      J('normal', '그런 말을 그냥 해. 아무렇지도 않게.'),
+    ]),
+    when(is('why', 'joke'), [
+      J('normal', '다른 친구도 좀 사귀려고ㅋㅋ… 래.'),
+      J('normal', '농담인 거 알아. 아는데.'),
+    ]),
+    narr('나은은 YSBS 점심 방송 사연 신청 페이지를 열었다. 보내는 사람: 익명.'),
+    J('normal', '\'오래된 친구가 있는데요,\''),
+    J('normal', '…'),
+    narr('나은은 그 한 줄을 지웠다. 그리고 메모장을 열었다. 고등학교 때부터 맨 위에 있는 메모.'),
+    narr('『올해는 말하기.』'),
+    J('normal', '…올해는.'),
+    J('normal', '근데 말하고 나면, 다음 날 아침 커피는 어떤 얼굴로 건네.'),
+    narr('나은은 메모장을 닫았다. 알람을 하나 맞췄다. 8시 30분. 커피 줄 서는 시간이었다.'),
+    hide('jia'),
+
+    bg('club_room_night', 'black'),
+    place('같은 시각, YSBS 주조정실', '오전 1:10'),
+    show('seoyeon', 'center', 'normal'),
+    M('아직 안 갔어? 알바 끝나고 들렀는데 불 켜져 있길래.'),
+    SY('normal', '이것만 하고.'),
+    when(is('sat', 'seoyeon'), [
+      M('오늘 녹음 들어 봤어. 평소보다 목소리가 좀 밝던데?'),
+      SY('normal', '아닌데. 똑같았는데.'),
+      M('왜일까~ 마지막 녹음이라 그런가~ 아니면...'),
+      SY('annoyed', '빨리 가요.'),
+    ], [
+      when(is('film', 'dawn'), [
+        M('근데 그 신입. 점심 때 꽤 잘하더라. 수요일 아침에 따로 가르쳤지?'),
+        SY('normal', '…가르친 거 없어요.'),
+        M('그래, 없겠지.'),
+        SY('annoyed', '웃지 마요.'),
+      ], [
+        M('김도연 그 신입, 괜찮더라.'),
+        SY('normal', '일 잘하더라고요.'),
+        M('너 사람 이름 빨리 외우는 거 처음 봐.'),
+        SY('annoyed', '...가요.'),
+      ]),
+    ]),
+    M('네네. 문 잠그고 가라~'),
+    when((s) => s.aff.seoyeon >= 10, [
+      narr('민혁이 나가고, 채연은 오늘 녹음 파일을 정리했다. NG 파일들을 하나씩 지우다가, 한 파일에서 손이 멈췄다.'),
+      narr('채연은 그 파일을 지우지 않고 다른 폴더로 옮겼다.'),
+    ]),
+    hide('seoyeon'),
+    jump('ch1_end'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  챕터 종료 — 현재 기울기에 따라 문구가 달라짐
+   * --------------------------------------------------------- */
+  VN.label('ch1_end', [
+    jump('ch2'),
+  ]);
+})();
+
+</script>
+<script>/* ==== js/story/chapter2.js ==== */
+/* =============================================================
+ *  CHAPTER 2 — 마감
+ *
+ *  4월. 설계 크리틱 마감 주간 + 점심 방송 사연함.
+ *
+ *  선택지
+ *   1. 익명 사연 처리      flags.letter : 'air' | 'skip' | 'give'
+ *        air  : 도연이 나은의 사연을 방송에 추천 → 점심에 나은 앞에서 방송됨
+ *        skip : 다른 사연을 고름 → 나은의 사연은 사연함에 남음
+ *        give : 채연에게 맡김 → 채연이 "이건 방송용이 아니에요" 하고 따로 보관
+ *   2. 크리틱 전날 밤 부스  flags.night  : 'help' | 'leave' | 'coffee'
+ *   3. 크리틱 끝난 밤      flags.walk   : 'jia' | 'seoyeon' | 'alone'
+ *
+ *  1장 플래그도 이어서 반영: film(방송 연습 방식), sat(개총 날), hotpack
+ * ============================================================= */
+(() => {
+  const { say, narr, show, hide, hideAll, move, bg, place, chapter, choice, when, aff, set, jump, endcard, bgm, sfx } = VN.dsl;
+  const Y = (f, t, o) => say('yujin', f, t, o);
+  const J = (f, t, o) => say('jia', f, t, o);
+  const SY = (f, t, o) => say('seoyeon', f, t, o);
+  const M = (t, o) => say('minhyuk', null, t, o);
+  const W = { whisper: true };
+  const MSG = { msg: true, as: '나은' };
+  const ON_AIR = { as: 'YSBS 점심 방송' };
+  const LETTER = { as: '익명의 사연' };
+  const is = (k, v) => (s) => s.flags[k] === v;
+
+  /* ---------------------------------------------------------
+   *  설계실 — 크리틱 D-4
+   * --------------------------------------------------------- */
+  VN.label('ch2', [
+    chapter('CHAPTER 2', '마감', ''),
+    bgm('night'),
+    bg('design_studio', 'black'),
+    place('건축관 4층 설계실', '4월 6일 (월) · 오전 3:10'),
+    show('yujin', 'midleft', 'normal'),
+    show('jia', 'midright', 'normal'),
+    narr('크리틱까지 나흘. 설계실엔 열두 명이 남아 있었고, 그중 깨어 있는 건 둘이었다.'),
+    Y('annoyed', '나은아… 이 벽 왜 자꾸 기울어?'),
+    J('normal', '본드 덜 말랐잖아. 손으로 잡고 있어. 30초만.'),
+    Y('normal', '…'),
+    Y('normal', '30초 지났지?'),
+    J('smile', '아직 10초.'),
+    Y('annoyed', '나 지금 시간이 제일 느리게 가.'),
+    J('normal', '아 잠깐, 칼 좀—'),
+    narr('나은이 커터칼을 집다가 손을 움찔했다.'),
+    J('surprised', '앗.'),
+    Y('surprised', '왜, 베였어? 보여 줘 봐.'),
+    J('normal', '괜찮아, 살짝—'),
+    narr('도연이 벽 모형을 놓고 나은 손을 잡아끌었다. 모형이 천천히 기울어졌다.'),
+    Y('serious', '피 나잖아. 가만있어.'),
+    narr('도연이 필통에서 밴드를 꺼내 나은 손가락에 감았다. 꼼꼼하게, 두 번.'),
+    J('shy', '…너 필통에 밴드도 있어?'),
+    Y('normal', '너가 맨날 베니까 넣어 다니잖아.'),
+    J('surprised', '…'),
+    J('shy', '…벽 쓰러졌어.'),
+    Y('surprised', '아 맞다!!', { hop: true }),
+    J('smile', '아 진짜. 30초를 못 버텨.'),
+    Y('annoyed', '너 때문이잖아!'),
+    J('smile', '응. 나 때문.'),
+    narr('나은은 웃으면서 밴드 감긴 손가락을 한참 내려다봤다.'),
+    J('normal', '중3 때 기억나? 너네 집 베란다에서 우드락으로 우리 학교 만든 거.'),
+    Y('smile', '아 그거! 엄마가 본드 냄새 난다고 베란다 문 다 열어 놨잖아. 1월에.'),
+    J('smile', '그때도 너 벽 잡고 30초 못 버텼어.'),
+    Y('annoyed', '…그건 기억 안 나는데.'),
+    J('smile', '난 다 기억나.'),
+    Y('normal', '그때 네가 그랬잖아. 나중에 진짜 건물 만들 거라고.'),
+    J('surprised', '…그걸 기억해?'),
+    Y('normal', '응. 그래서 나도 건축과 쓴 건데.'),
+    J('surprised', '…처음 듣는데.'),
+    Y('smile', '말 안 했었나?'),
+    J('normal', '…안 했어.'),
+    J('normal', '근데 너 내일 아침 방송 당번 아니야?'),
+    Y('surprised', '…지금 몇 시야?'),
+    J('normal', '세 시 십 분.'),
+    Y('annoyed', '…네 시간 잘 수 있다. 네 시간이면 충분해.'),
+    J('smile', '여기서 자면 두 시간 더 잘 수 있는데.'),
+    Y('smile', '오 천재. 깨워 줘.'),
+    J('normal', '…알람은 너가 맞춰.'),
+    hideAll(),
+
+    /* -------- 아침 방송 -------- */
+    bgm('daily'),
+    bg('club_room_night', 'black'),
+    place('YSBS 주조정실', '4월 6일 (월) · 오전 7:27'),
+    show('seoyeon', 'midright', 'normal'),
+    narr('콘솔 앞 의자가 비어 있었다. 채연은 시계를 한 번, 문을 한 번 봤다.'),
+    SY('normal', '…3분 전.'),
+    show('yujin', 'midleft', 'surprised', { from: 'left' }),
+    Y('surprised', '왔어요! 왔습니다! 세이프!', { hop: true }),
+    SY('normal', '…'),
+    SY('normal', '설계실에서 왔죠.'),
+    Y('surprised', '어떻게 아세요?'),
+    SY('normal', '볼에 본드 묻었어요.'),
+    Y('surprised', '헐.'),
+    SY('normal', '시간 없어. 마이크 체크.'),
+    sfx('onair'),
+    narr('방송은 무사히 나갔다. 페이더를 내리자마자 도연은 콘솔에 이마를 댔다.'),
+    SY('normal', '…'),
+    narr('톡, 하고 이마 옆에 뭔가 놓였다. 비타민 음료였다.'),
+    Y('surprised', '이거 저 주시는 거예요?'),
+    when((s) => s.flags.hotpack, [
+      Y('smile', '핫팩 갚는 거죠?'),
+      SY('normal', '뭐 겸사겸사?'),
+    ]),
+    when((s) => s.flags.sat === 'seoyeon', [
+      Y('smile', '감사합니다. 그 특집, 방송 언제 나가요?'),
+      SY('normal', '개국기념일. 5월.'),
+      SY('normal', '…그리고 그날. 고마웠어요.'),
+      Y('smile', '저 레벨만 잡았는데요.'),
+      SY('normal', '그거 말고.'),
+    ]),
+    M('굿모닝~ 오 신입 살아 있네. 오늘 점심에 사연 정리 좀 부탁해. 사연함 꽉 찼어.'),
+    Y('normal', '넵… 점심 전까지 할게요.'),
+    hideAll(),
+
+    /* -------- 사연함 -------- */
+    bg('club_room', 'black'),
+    place('YSBS 방송국', '오전 11:40'),
+    show('yujin', 'center', 'normal'),
+    narr('사연함엔 쪽지와 출력물이 한가득이었다. 신청곡, 고백, 학식 메뉴 항의, 고백, 또 고백.'),
+    Y('normal', '\'공대 3층 자판기 좀 고쳐 주세요\'… 이건 시설과에…'),
+    Y('normal', '\'3월 14일 학식 돈가스가 너무 얇았습니다\'… 이건 왜 여기…'),
+    narr('그중 하나는 온라인 신청으로 들어온 출력물이었다. 보내는 사람: 익명.'),
+    say('jia', null, '오래된 친구가 있는데요.', LETTER),
+    say('jia', null, '저는 그 친구를 좋아해요. 꽤 오래요. 그 친구는 제가 매일 커피 줄을 대신 서는 줄도 몰라요. 입맛에 맞게 시키는건데 그냥 \'알바생이 센스 있다\'고 생각해요.', LETTER),
+    say('jia', null, '말하면 친구도 잃을까 봐 못 하겠어요. 신청곡은 없어요. 그냥 어딘가에 한 번은 말해 보고 싶었어요.', LETTER),
+    Y('normal', '…'),
+    Y('smile', '와. 이 친구 진짜 둔하다.'),
+    Y('normal', '알바생이 센스 있대… 무슨 사람이 이렇게까지 몰라.'),
+    narr('도연은 그 쪽지를 한참 들고 있었다.'),
+
+    // ── 선택지 1 ──────────────────────────────
+    choice('이 사연, 어떻게 할까?', [
+      {
+        text: '오늘 점심 방송에 추천한다', aff: { seoyeon: 1 }, set: { letter: 'air' },
+        then: [
+          Y('normal', '이거 좋다. 이거 꼭 읽어 줘야 돼.'),
+          narr('도연은 그 쪽지를 \'오늘 방송\' 바구니 맨 위에 올렸다.'),
+        ],
+      },
+      {
+        text: '다른 사연을 고른다 — 너무 개인적인 것 같다', aff: { jia: 1 }, set: { letter: 'skip' },
+        then: [
+          Y('normal', '…이건 좀. 방송에 나가면 이 사람 친구가 들을 수도 있잖아.'),
+          narr('도연은 쪽지를 다시 사연함에 넣었다. 대신 돈가스 항의를 \'오늘 방송\' 바구니에 올렸다.'),
+          Y('smile', '돈가스는 공공의 문제니까.'),
+        ],
+      },
+      {
+        text: '채연 선배한테 어떻게 할지 물어본다', aff: { seoyeon: 2 }, set: { letter: 'give' },
+        then: [
+          show('seoyeon', 'midright', 'normal', { from: 'right' }),
+          move('yujin', 'midleft'),
+          Y('normal', '선배, 이거 방송해도 될까요? 좀 애매해서요.'),
+          narr('채연이 쪽지를 읽었다. 끝까지, 두 번.'),
+          SY('normal', '이건 방송용 아니에요.'),
+          Y('surprised', '별로예요?'),
+          SY('normal', '아뇨. 너무 좋아서요.'),
+          SY('normal', '이 사람은 라디오 말고 그 친구한테 말해야 돼요. 우리가 읽어 버리면, 이 사람은 이걸로 됐다고 생각하고 끝내요.'),
+          Y('surprised', '…'),
+          SY('normal', '내가 보관할게요.'),
+          narr('채연은 쪽지를 반으로 접어 자기 다이어리 사이에 끼웠다.'),
+          Y('normal', '선배는 이런 거 어떻게 알아요?'),
+          SY('normal', '원고 많이 읽어 봐서요.'),
+          hide('seoyeon'),
+        ],
+      },
+    ]),
+    hideAll(),
+
+    /* -------- 학식 · 점심 방송 -------- */
+    bg('cafeteria', 'black'),
+    place('학생식당', '오후 12:40'),
+    show('yujin', 'midleft', 'smile'),
+    show('jia', 'midright', 'normal'),
+    J('normal', '살아 있네. 아침 방송 안 늦었어?'),
+    Y('smile', '3분 전 세이프. 선배가 비타민 음료도 줬어.'),
+    J('surprised', '…그 무서운 선배가?'),
+    Y('smile', '응. 볼에 본드 묻었다고 알려 주고.'),
+    J('normal', '본드는 내가 아까 말해 주려고 했는데.'),
+    Y('surprised', '근데 왜 안 말해 줬어?'),
+    J('smile', '귀여워서.'),
+    Y('annoyed', '…야.'),
+    narr('천장 스피커에서 점심 방송 시그널이 흘러나왔다.'),
+    when(is('letter', 'air'), [
+      bgm(null),
+      say('seoyeon', null, '오늘 첫 사연은 익명으로 온 사연입니다.', ON_AIR),
+      say('seoyeon', null, '\'오래된 친구가 있는데요. 저는 그 친구를 좋아해요. 꽤 오래요.\'', ON_AIR),
+      J('surprised', '…'),
+      Y('smile', '아 이거 내가 고른 거다! 들어 봐 들어 봐.'),
+      say('seoyeon', null, '\'그 친구는 제가 매일 커피 줄을 대신 서는 줄도 몰라요. 그냥 알바생이 센스 있다고 생각해요.\'', ON_AIR),
+      narr('나은의 숟가락이 식판에 닿은 채로 멈췄다.'),
+      Y('smile', '진짜 둔하지 않아? 알바생이 센스 있대ㅋㅋ'),
+      J('normal', '…'),
+      J('normal', '…응. 진짜 둔하다.'),
+      say('seoyeon', null, '사연 보내 주신 분. 라디오에 말해 본 것도 용기지만, 다음엔 그 친구한테 직접 말할 수 있기를 바랍니다.', ON_AIR),
+      Y('normal', '그 친구 이 방송 들었으면 좋겠다. 그치?'),
+      J('normal', '…'),
+      J('smile', '글쎄. 못 알아들을 것 같은데.'),
+      Y('surprised', '왜?'),
+      J('smile', '둔하다며.'),
+      narr('나은은 돈가스 한 조각을 도연 접시에 옮겼다. 오늘은 배부르다는 말을 하지 않았다.'),
+      set({ jiaHeard: true }),
+      aff({ jia: 3 }),
+      bgm('daily'),
+    ]),
+    when(is('letter', 'skip'), [
+      say('seoyeon', null, '오늘 첫 사연입니다. \'3월 14일 학식 돈가스가 너무 얇았습니다. 종이인 줄 알았습니다.\'', ON_AIR),
+      Y('smile', '이거 내가 골랐어!'),
+      J('smile', 'ㅋㅋㅋㅋ 이걸 왜 골라.'),
+      Y('normal', '아니 원래 더 좋은 게 있었는데. 어떤 사람이 친구를 오래 좋아한다는 사연.'),
+      J('surprised', '…'),
+      Y('normal', '근데 방송 나가면 그 친구가 들을 수도 있잖아. 그건 좀 아닌 것 같아서 뺐어.'),
+      J('normal', '…'),
+      J('normal', '왜? 들으면 좋잖아.'),
+      Y('serious', '그런 건 직접 들어야지. 라디오로 들으면 좀 서운할 것 같아.'),
+      J('surprised', '…'),
+      J('shy', '…그렇구나.'),
+      aff({ jia: 2 }),
+    ]),
+    when(is('letter', 'give'), [
+      say('seoyeon', null, '오늘 첫 사연입니다. \'공대 3층 자판기가 동전을 먹습니다. 벌써 2,300원 먹혔습니다.\'', ON_AIR),
+      J('smile', 'ㅋㅋㅋ 2,300원이면 많이 먹었다.'),
+      Y('normal', '아까 진짜 좋은 사연 있었는데. 선배가 방송용 아니래.'),
+      J('normal', '어떤 건데?'),
+      Y('normal', '친구를 오래 좋아하는 사람 얘기. 근데 그 친구가 엄청 둔해.'),
+      J('surprised', '…'),
+      Y('normal', '선배가 그러더라. 그 사람은 라디오 말고 그 친구한테 직접 말해야 된대.'),
+      J('normal', '…'),
+      J('normal', '…그 선배, 좀 무섭다.'),
+      Y('surprised', '왜? 맞는 말인데.'),
+      J('normal', '너무 맞는 말이라서.'),
+      set({ seoyeonKeeps: true }),
+    ]),
+    hideAll(),
+
+    /* -------- 크리틱 전날 밤 -------- */
+    bgm('night'),
+    bg('design_studio', 'black'),
+    place('건축관 4층 설계실', '4월 9일 (목) · 오후 11:20'),
+    show('yujin', 'midleft', 'annoyed'),
+    show('jia', 'midright', 'normal'),
+    Y('annoyed', '아 충전기. 충전기 방송국에 두고 왔어.'),
+    J('normal', '지금 가게? 지붕 아직 안 붙였는데.'),
+    Y('normal', '노트북 3퍼야. 렌더링 돌려야 돼. 금방 갔다 올게. 15분.'),
+    J('smile', '15분이면 지붕 혼자 붙인다?'),
+    Y('smile', '붙이지 마! 같이 붙여! 지붕은 같이!'),
+    J('smile', '알았어 알았어. 빨리 와.'),
+    hideAll(),
+
+    bg('booth', 'black'),
+    place('YSBS 방송국', '오후 11:34'),
+    narr('방송국 불이 꺼져 있었다. 녹음 부스 하나만 빼고.'),
+    say('seoyeon', null, '오늘 서울 낮 최고 기온은 18도로—', { as: '부스 안' }),
+    say('seoyeon', null, '…다시.', { as: '부스 안' }),
+    say('seoyeon', null, '오늘 서울 낮 최고 기온은 18도로 평년보다 높겠습니다. 다만 일교차가—', { as: '부스 안' }),
+    say('seoyeon', null, '…아, 진짜.', { as: '부스 안' }),
+    show('yujin', 'left', 'surprised'),
+    Y('surprised', '(…선배?)', W),
+    narr('부스 유리창 너머로 채연이 보였다. 원고 옆엔 \'공채 D-23\'이라고 적힌 포스트잇이 붙어 있었다. 녹음 목록엔 \'뉴스리딩_take23\'.'),
+    Y('normal', '(아침 방송은 맨날 한 번에 하는데…)', W),
+    narr('주머니에서 휴대폰이 울렸다.'),
+    J('normal', '충전기 찾았어?? 늦으면 지붕 혼자 붙인다', MSG),
+
+    // ── 선택지 2 ──────────────────────────────
+    choice('부스 안의 채연을 보고, 도연은—', [
+      {
+        text: '노크하고 들어가서 녹음을 돕겠다고 한다', aff: { seoyeon: 4 }, set: { night: 'help' },
+        then: [
+          narr('똑똑.'),
+          show('seoyeon', 'right', 'surprised', { from: 'right' }),
+          move('yujin', 'midleft'),
+          move('seoyeon', 'midright'),
+          SY('surprised', '…언제부터 있었어요.'),
+          Y('normal', '18도부터요.'),
+          SY('annoyed', '…처음부터네.'),
+          Y('normal', '혼자 녹음하면 레벨 보면서 읽어야 되잖아요. 제가 볼게요. 선배는 읽기만 해요.'),
+          SY('normal', '…크리틱 내일이라면서요.'),
+          Y('smile', '10분 정도는 여유돼요.'),
+          SY('normal', '…'),
+          SY('normal', '10분만.'),
+          narr('도연이 콘솔 앞에 앉았다. 채연이 부스 안에서 숨을 골랐다.'),
+          SY('normal', '오늘 서울 낮 최고 기온은 18도로 평년보다 높겠습니다. 다만 일교차가 크겠으니 건강에 유의하시기 바랍니다.'),
+          narr('한 번에 끝났다. 채연이 헤드폰을 벗었다.'),
+          SY('normal', '…24번째 만에.'),
+          Y('smile', '제가 있어서요?'),
+          SY('annoyed', '23번 연습해서요.'),
+          SY('normal', '…아무한테도 말하지 마요. 공채 준비하는 거.'),
+          Y('normal', '왜요?'),
+          SY('normal', '떨어지면 쪽팔리니까.'),
+          Y('smile', '안 떨어질 텐데요.'),
+          SY('surprised', '…'),
+          SY('normal', '빨리 가요. 크리틱 준비해야지.'),
+          hideAll(),
+          bg('design_studio', 'black'),
+          place('건축관 4층 설계실', '오전 12:05'),
+          show('yujin', 'midleft', 'normal'),
+          show('jia', 'midright', 'normal'),
+          narr('설계실에 돌아오니 지붕은 이미 붙어 있었다. 나은은 모형 옆에 엎드려 있었다.'),
+          J('normal', '…늦었어. 30분.', W),
+          Y('normal', '…미안.'),
+        ],
+      },
+      {
+        text: '못 본 척 조용히 충전기만 챙겨 나온다', aff: { jia: 3 }, set: { night: 'leave' },
+        then: [
+          narr('도연은 발소리를 죽이고 책상 위 충전기만 챙겨 나왔다. 문이 닫히기 직전, 부스 안에서 또 한 번 \'…다시\'가 들렸다.'),
+          hideAll(),
+          bg('design_studio', 'black'),
+          place('건축관 4층 설계실', '오후 11:50'),
+          show('yujin', 'midleft', 'normal'),
+          show('jia', 'midright', 'smile'),
+          J('smile', '14분 50초. 오.'),
+          Y('smile', '지붕 안 붙였지?'),
+          J('smile', '안 붙였어. 같이 붙이자며.'),
+          narr('둘은 지붕 양 끝을 하나씩 잡았다. 본드가 마를 때까지, 30초.'),
+          J('normal', '…무슨 일 있었어? 표정이 좀.'),
+          Y('normal', '아니. 그냥… 다들 열심히 사는구나 싶어서.'),
+          J('smile', '뭐야 갑자기.'),
+          Y('smile', '너도. 너도 열심히 살아.'),
+          J('shy', '…30초 지났어. 놓아도 돼.'),
+          Y('normal', '응.'),
+        ],
+      },
+      {
+        text: '자판기 커피를 하나 문 앞에 두고 나온다', aff: { seoyeon: 2, jia: 2 }, set: { night: 'coffee' },
+        then: [
+          narr('도연은 복도 자판기에서 캔커피 하나를 뽑았다. 부스 문 앞에 조용히 내려놓고, 포스트잇 한 장을 붙였다.'),
+          narr('『파이팅. — 기술부』'),
+          narr('그리고 충전기를 챙겨 나왔다.'),
+          hideAll(),
+          bg('design_studio', 'black'),
+          place('건축관 4층 설계실', '오후 11:55'),
+          show('yujin', 'midleft', 'normal'),
+          show('jia', 'midright', 'normal'),
+          J('normal', '20분. 5분 늦었어.'),
+          Y('smile', '자판기 들렀어. 너 것도.'),
+          J('surprised', '…커피?'),
+          Y('smile', '바닐라라떼는 없더라.'),
+          J('smile', '땡큐'),
+          narr('나은은 커피를 마시지 않고 한참 손에 쥐고 있었다.'),
+        ],
+      },
+    ]),
+    hideAll(),
+
+    /* -------- 크리틱 당일 -------- */
+    bgm('daily'),
+    bg('design_studio', 'black'),
+    place('건축관 4층 설계실 · 크리틱', '4월 10일 (금) · 오후 5:30'),
+    show('yujin', 'midleft', 'normal'),
+    show('jia', 'midright', 'normal'),
+    narr('크리틱이 끝났다. 교수님 한마디는 \'벽이 좀 기울었네.\'였다.'),
+    Y('annoyed', '…기울었대.'),
+    J('smile', '그 벽이 처음부터 기울었잖아. 너가 30초를 못 버텨서.'),
+    Y('annoyed', '너가 손을 베서잖아.'),
+    J('smile', '응. 나 때문.'),
+    when(is('night', 'help'), [
+      J('normal', '…어제 30분 동안 뭐 했어?'),
+      Y('normal', '아, 충전기가 잘 안 보여서.'),
+      J('normal', '…그래.'),
+      narr('나은은 더 묻지 않았다.'),
+    ]),
+    narr('도연의 휴대폰이 울렸다.'),
+    when(is('night', 'coffee'), [
+      say('seoyeon', null, '포스트잇 기술부 맞죠', { msg: true, as: '채연 선배' }),
+      say('seoyeon', null, '잘 마쳤어요.', { msg: true, as: '채연 선배' }),
+      Y('smile', '헐.'),
+      J('surprised', '왜? 누군데?'),
+      Y('smile', '아, 방송국 선배.'),
+    ], [
+      M('신입~ 오늘 밤 벚꽃 피크래. 방송국 사람들 밤에 벚꽃길 간다. 올래?', { msg: true, as: '민혁 국장' }),
+    ]),
+    when((s) => s.flags.night === 'help', [
+      say('seoyeon', null, '오늘 밤에 한 번만 더 들어 줄 수 있어요? 마지막 점검', { msg: true, as: '채연 선배' }),
+    ]),
+    J('normal', '…있잖아.'),
+    J('normal', '크리틱 끝나면 벚꽃 보러 가기로 했던 거 기억나?'),
+    Y('surprised', '어? 우리가?'),
+    J('annoyed', '1학년 때. 크리틱 끝나면 꼭 가자고 했는데 둘 다 쓰러져 잤잖아.'),
+    Y('smile', '아 맞다. 그랬지.'),
+    J('normal', '…오늘 갈래?'),
+
+    // ── 선택지 3 ──────────────────────────────
+    choice('크리틱이 끝난 밤, 도연은—', [
+      {
+        text: '나은이랑 벚꽃 보러 간다', aff: { jia: 5 }, set: { walk: 'jia' },
+        jump: 'ch2_walk_jia',
+      },
+      {
+        text: (s) => (s.flags.night === 'help' ? '채연 선배의 마지막 점검을 도우러 간다' : '방송국 사람들이랑 벚꽃길에 간다'),
+        aff: { seoyeon: 5 }, set: { walk: 'seoyeon' },
+        jump: 'ch2_walk_seoyeon',
+      },
+      {
+        text: '오늘은 집에 가서 잔다 — 너무 피곤하다', set: { walk: 'alone' },
+        jump: 'ch2_walk_alone',
+      },
+    ]),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  3-A. 나은과 벚꽃길
+   * --------------------------------------------------------- */
+  VN.label('ch2_walk_jia', [
+    bgm('heart'),
+    bg('cherry_path', 'black'),
+    place('인문관 뒤 벚꽃길', '4월 10일 (금) · 오후 9:30'),
+    show('yujin', 'midleft', 'smile'),
+    show('jia', 'midright', 'normal'),
+    Y('smile', '와. 진짜 다 폈다.'),
+    J('normal', '1년 늦었지만.'),
+    Y('smile', '1년 늦은 게 어디야. 오늘 안 왔으면 2년 늦었지.'),
+    J('smile', '그건 그렇네.'),
+    narr('바람이 불었다. 꽃잎이 한꺼번에 떨어졌다.'),
+    Y('surprised', '어, 머리에 붙었다. 가만있어 봐.'),
+    narr('도연이 나은 머리에서 꽃잎을 떼어 냈다. 하나, 둘.'),
+    J('shy', '…많이 붙었어?'),
+    Y('smile', '응. 너 지금 완전 꽃 그 자체야.'),
+    J('annoyed', '칭찬이야?'),
+    Y('smile', '칭찬이야. 예쁘다는 뜻.'),
+    J('surprised', '…'),
+    when(is('letter', 'air'), [
+      J('normal', '…있잖아. 그 사연.'),
+      Y('normal', '아, 점심에 그거?'),
+      J('normal', '그 친구가 그 방송 들었으면… 알아챘을까?'),
+      Y('normal', '음… 커피 얘기 나왔으니까 알아챘겠지. 나 같으면 바로 알았어.'),
+      J('surprised', '…'),
+      J('smile', '그래? 너는 바로 알아?'),
+      Y('smile', '당연하지. 나 그렇게 둔하지 않아.'),
+      J('smile', '…그렇구나.'),
+      narr('나은은 웃었다. 오래, 꽤 오래.'),
+    ]),
+    when(is('letter', 'skip'), [
+      J('normal', '아까 그 말. 그런 건 직접 들어야 된다는 거.'),
+      Y('normal', '응.'),
+      J('normal', '…너는 누가 너 좋아한다고 하면, 직접 들어야 좋아?'),
+      Y('surprised', '갑자기?'),
+      Y('normal', '음… 응. 라디오로 들으면 좀 아쉬울 것 같아. 얼굴 보고 들어야지.'),
+      J('normal', '…그렇구나.'),
+      J('normal', '알았어.'),
+      Y('smile', '뭘 알았어?'),
+      J('smile', '그냥. 알았다고.'),
+    ]),
+    when(is('letter', 'give'), [
+      J('normal', '그 무서운 선배가 한 말 있잖아. 라디오 말고 직접 말하라는 거.'),
+      Y('normal', '응.'),
+      J('normal', '…그거 쉬운 말 아닌데.'),
+      Y('surprised', '왜?'),
+      J('normal', '말했다가 친구도 잃으면 어떡해.'),
+      Y('normal', '음… 근데 진짜 친구면 안 잃지 않아? 나 같으면 안 잃어.'),
+      J('surprised', '…'),
+      J('normal', '너 같으면.'),
+      Y('smile', '응. 나 같으면.'),
+    ]),
+    J('normal', '내년에도 오자. 크리틱 끝나면.'),
+    Y('smile', '응. 내년엔 안 쓰러지고.'),
+    J('smile', '약속.'),
+    narr('나은이 새끼손가락을 내밀었다. 밴드가 아직 감겨 있는 손이었다.'),
+    hideAll(),
+    jump('ch2_end'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  3-B. 채연 쪽
+   * --------------------------------------------------------- */
+  VN.label('ch2_walk_seoyeon', [
+    when(is('night', 'help'), [
+      bgm('night'),
+      bg('booth', 'black'),
+      place('YSBS 녹음 부스', '4월 10일 (금) · 오후 9:30'),
+      show('yujin', 'midleft', 'normal'),
+      show('seoyeon', 'midright', 'normal'),
+      SY('normal', '…크리틱 끝났다면서. 안 피곤해요?'),
+      Y('smile', '죽을 것 같아요. 근데 들어 준다고 했잖아요.'),
+      SY('normal', '…'),
+      SY('normal', '이번엔 원고 말고, 자기소개 할게요. 면접용.'),
+      Y('normal', '넵. 레벨 오케이.'),
+      SY('normal', '안녕하십니까. 지원자 정채연입니다. 저는 아침 7시 30분의 목소리를—'),
+      SY('annoyed', '…아니다. 이거 너무 오글거려.'),
+      Y('smile', '저 좋은데요?'),
+      SY('normal', '듣는 사람 한 명 의견은 참고만 할게요.'),
+      Y('smile', '그 한 명이 저예요?'),
+      SY('annoyed', '…조용히 해요.'),
+      narr('그날 밤, 채연은 자기소개를 일곱 번 했다. 도연은 일곱 번 다 \'좋은데요\'라고 했다.'),
+      SY('normal', '…다 좋다고 하면 연습이 안 되잖아요.'),
+      Y('smile', '진짜 다 좋았는데요.'),
+      SY('surprised', '…'),
+      SY('normal', '…고마워요. 오늘 벚꽃 피크라던데, 못 보게 해서 미안해요.'),
+      Y('smile', '여기서 나가면서 보면 되죠. 같이 나가요.'),
+      narr('방송국을 나오니 학생회관 앞 벚나무가 가로등 아래 하얗게 서 있었다. 둘은 아무 말 없이 그 아래를 지나갔다.'),
+    ], [
+      bgm('heart'),
+      bg('cherry_path', 'black'),
+      place('학생회관 앞 벚꽃길', '4월 10일 (금) · 오후 9:30'),
+      M('신입 왔다~ 자 다들 사진 찍자. 채연아 너도 들어와.'),
+      show('seoyeon', 'midright', 'normal'),
+      show('yujin', 'midleft', 'smile'),
+      SY('normal', '난 됐어요. 오빠들 찍어요.'),
+      M('너 졸업 전에 방송국 단체 사진 한 장은 있어야지.'),
+      SY('normal', '…'),
+      narr('결국 채연도 끌려 들어왔다. 자리가 도연 옆이었다.'),
+      M('자 하나 둘— 채연아 표정 좀!'),
+      SY('annoyed', '원래 이 표정이에요.'),
+      Y('smile', '선배 웃으면 예쁜데.'),
+      SY('surprised', '…'),
+      M('오 지금! 찰칵!'),
+      narr('사진 속 채연은 도연 쪽을 보고 있었다. 웃고 있는지 아닌지 애매한 얼굴로.'),
+      when(is('night', 'coffee'), [
+        SY('normal', '…포스트잇. 고마웠어요.', W),
+        Y('smile', '잘 마치셨다며요.', W),
+        SY('normal', '…덕분이라고는 안 했어요.', W),
+      ]),
+    ]),
+    J('normal', '벚꽃 잘 보고 있어? 나는 기숙사 앞 벚꽃 봤어ㅎㅎ', MSG),
+    J('normal', '[사진]', MSG),
+    narr('사진 속 벚꽃은 나은 혼자 찍은 거였다. 화면 구석에 밴드 감긴 손가락이 보였다.'),
+    Y('normal', '(…같이 갔으면, 머리에 붙은 꽃잎 떼 주느라 바빴을 텐데.)', W),
+    aff({ jia: -1 }),
+    hideAll(),
+    jump('ch2_end'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  3-C. 혼자 귀가
+   * --------------------------------------------------------- */
+  VN.label('ch2_walk_alone', [
+    bgm('night'),
+    bg('jia_room', 'black'),
+    place('도연의 방', '4월 10일 (금) · 오후 9:00'),
+    show('yujin', 'center', 'normal'),
+    Y('normal', '…나은아 미안. 나 진짜 죽을 것 같아. 다음 주에 가자.'),
+    J('normal', '응 ㅋㅋ 그럴 줄 알았어. 푹 자', MSG),
+    J('normal', '내일 벚꽃 다 떨어지면 너 때문이다', MSG),
+    narr('도연은 답장을 쓰다가 그대로 잠들었다.'),
+    narr('그 시간, 벚꽃길엔 나은 혼자 잠깐 서 있다가 돌아갔다. 채연은 방송국 부스에서 take31을 녹음하고 있었다.'),
+    narr('녹음 버튼을 누르기 전, 채연은 콘솔 앞 빈 의자를 한 번 봤다.'),
+    narr('다음 날 아침, 벚꽃은 반쯤 떨어져 있었다.'),
+    hideAll(),
+    jump('ch2_end'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  챕터 2 종료
+   * --------------------------------------------------------- */
+  VN.label('ch2_end', [
+    jump('ch3'),
+  ]);
+})();
+
+</script>
+<script>/* ==== js/story/chapter3.js ==== */
+/* =============================================================
+ *  CHAPTER 3 — 온에어  (공통 루트 마지막 챕터)
+ *
+ *  5월. 개국기념 특집 방송 → 채연의 공채 결과 → 대동제 생방송.
+ *
+ *  선택지
+ *   1. 공채 결과가 나온 밤      flags.comfort : 'stay' | 'cheer' | 'normal'
+ *   2. "너 요즘 그 선배 얘기 많이 한다"  flags.feel : 'senior' | 'curious' | 'jealous'
+ *   3. 축제 마지막 밤, 무전과 나은     flags.last  : 'jia' | 'seoyeon' | 'wait'
+ *   → 끝나면 route_split (routes.js) 에서 루트 결정
+ * ============================================================= */
+(() => {
+  const { say, narr, show, hide, hideAll, move, bg, place, chapter, choice, when, aff, set, jump, bgm, sfx, fx } = VN.dsl;
+  const Y = (f, t, o) => say('yujin', f, t, o);
+  const J = (f, t, o) => say('jia', f, t, o);
+  const SY = (f, t, o) => say('seoyeon', f, t, o);
+  const M = (t, o) => say('minhyuk', null, t, o);
+  const G = (t, o) => say('gwadae', null, t, o);
+  const W = { whisper: true };
+  const MSG = { msg: true, as: '나은' };
+  const RADIO = { as: 'YSBS 개국기념 특집' };
+  const RADIO_ON = { as: 'YSBS 개국기념 특집', sfx: 'onair' };
+  const WALKIE = { as: '무전 · 민혁' };
+  const is = (k, v) => (s) => s.flags[k] === v;
+  const lean = (who) => (s) => (VN.leanCount ? VN.leanCount(s, who) : 0);
+  const leansJia = (s) => lean('jia')(s) >= 5;
+  const leansSeoyeon = (s) => lean('seoyeon')(s) >= 5;
+  leansJia.__desc = '지금까지 나은 쪽 선택을 5번 이상 했을 때';
+  leansSeoyeon.__desc = '지금까지 채연 쪽 선택을 5번 이상 했을 때';
+
+  VN.label('ch3', [
+    chapter('CHAPTER 3', '온에어', ''),
+
+    /* -------- 카메라 테스트 날 -------- */
+    bgm('daily'),
+    bg('club_room', 'black'),
+    place('YSBS 방송국', '5월 2일 (토) · 오전 7:50'),
+    show('yujin', 'center', 'normal'),
+    narr('토요일 아침, 장비 반납하러 들른 방송국. 아나운서부 책상 위에 손거울 하나가 엎어져 있었다.'),
+    narr('거울 뒤엔 포스트잇이 빽빽했다. \'ㅅ 발음 — 혀끝\' \'숨은 쉼표 앞에서\' \'웃기. 눈까지.\''),
+    M('아, 그거 채연이 거. 오늘 카메라 테스트 갔어.'),
+    when(is('night', 'help'), [
+      Y('normal', '(공채… 오늘이었구나.)', W),
+    ], [
+      Y('surprised', '카메라 테스트요?'),
+      M('아나운서 공채. 아, 너 몰랐구나. 쟤 티 안 내니까.'),
+    ]),
+    M('서류, 음성 다 붙고 오늘이 카메라 테스트. 이거 넘으면 최종 면접이야.'),
+    M('작년에도 여기서 떨어졌어. 웃는 게 어색하다고.'),
+    M('그 뒤로 1년 동안 아침 방송 한 번도 안 빠졌어. 그게 연습이래.'),
+    Y('normal', '…'),
+    narr('\'웃기. 눈까지.\' 그 포스트잇만 모서리가 일어나 있었다. 몇 번이고 떼었다 붙인 것처럼.'),
+    M('결과는 목요일. …너 이거 못 들은 걸로 해.'),
+    hideAll(),
+
+    /* -------- 개국기념 특집 -------- */
+    bgm(null),
+    bg('design_studio', 'black'),
+    place('건축관 4층 설계실', '5월 7일 (목) · 오후 12:30'),
+    show('yujin', 'midleft', 'normal'),
+    show('jia', 'midright', 'normal'),
+    narr('중간고사가 끝난 설계실은 오랜만에 조용했다. 창밖 스피커에서 차임벨이 울렸다.'),
+    say('seoyeon', null, '안녕하세요. YSBS 개국기념 특집, 정채연입니다.', RADIO_ON),
+    Y('smile', '어! 이거다. 채연 선배 특집.'),
+    J('normal', '아, 그 마지막 특집?'),
+    when(is('sat', 'seoyeon'), [
+      say('seoyeon', null, '오늘 한 시간, YSBS가 지나온 시간을 같이 들어 보려고 합니다.', RADIO),
+      J('normal', '…이거 너가 녹음한 거야?'),
+      Y('smile', '응. 그날 부스에서 레벨 내가 잡았어.'),
+      J('surprised', '…'),
+      J('normal', '…그날 개총 빠지고 간 날.'),
+      Y('normal', '응. 선배 NG 엄청 내다가 마지막에 한 번에 갔어.'),
+      J('normal', '…좋았겠다.'),
+      Y('surprised', '응?'),
+      J('smile', '좋았겠다고.'),
+      narr('나은은 모형 칼을 집었다가, 그냥 내려놓았다.'),
+    ], [
+      say('seoyeon', null, '오늘 한 시간, YSBS가 지나온 시간을 같이 들어 보려고 합니다.', RADIO),
+      Y('smile', '와… 진짜 목소리 좋다.'),
+      J('normal', '…응.'),
+      when(is('sat', 'both'), [Y('smile', '저 녹음 내가 레벨 잡은 거다? 앞부분 반은.')]),
+      J('normal', '너 이 선배 얘기할 때 표정 알아?'),
+      Y('surprised', '무슨 표정?'),
+      J('smile', '아냐. 그냥.'),
+    ]),
+    narr('특집이 끝나고 도연의 휴대폰이 울렸다.'),
+    M('신입. 혹시 채연이한테 연락 왔어?', { msg: true, as: '민혁 국장' }),
+    M('오늘 카메라 테스트 결과 나오는 날인데 연락이 안 돼서', { msg: true, as: '민혁 국장' }),
+    Y('normal', '(목요일. …오늘이구나.)', W),
+    hideAll(),
+
+    /* -------- 공채 결과 -------- */
+    bgm('night'),
+    bg('booth', 'black'),
+    place('YSBS 녹음 부스', '오후 10:40'),
+    narr('방송국 불은 꺼져 있었다. 녹음 부스 하나만 빼고.'),
+    show('yujin', 'left', 'normal'),
+    show('seoyeon', 'right', 'normal'),
+    narr('채연은 부스 안에 앉아 있었다. 헤드폰은 벗은 채, 마이크도 꺼져 있었다.'),
+    move('yujin', 'midleft'),
+    move('seoyeon', 'midright'),
+    SY('surprised', '…김도연 씨.'),
+    SY('normal', '오빠가 보냈죠.'),
+    Y('normal', '…네.'),
+    SY('normal', '떨어졌어요. 카메라 테스트에서.'),
+    SY('normal', '목소리는 좋은데 화면에서 너무 딱딱하대요. 웃는 게 어색하대.'),
+    Y('normal', '…'),
+    SY('smile', '그건 알았는데. 남이 말해 주니까 좀 그렇네.'),
+    SY('normal', '작년이랑 토씨 하나 안 틀리고 똑같은 말이에요.'),
+    narr('채연은 무릎 위에서 손가락을 접었다 폈다 했다. 대본을 넘길 때 하던 동작이었다.'),
+    SY('normal', '오빠한테는 아직 말 못 했어요. 1년 동안 아침마다 연습 봐 준 사람인데.'),
+    SY('sad', '…김도연 씨가 처음이에요. 이거 들은 사람.'),
+
+    // ── 선택지 1 ──────────────────────────────
+    choice('채연 옆에서, 도연은—', [
+      {
+        text: '아무 말 없이 옆에 앉는다', aff: { seoyeon: 5 }, set: { comfort: 'stay' },
+        then: [
+          narr('도연은 부스 바닥에, 채연 의자 옆에 앉았다. 아무 말도 하지 않았다.'),
+          SY('normal', '…뭐 해요.'),
+          Y('normal', '레벨 체크요.'),
+          SY('surprised', '마이크 꺼져 있는데.'),
+          Y('normal', '그러니까요. 조용하네요.'),
+          SY('normal', '…'),
+          narr('한참 뒤, 채연이 아주 작게 웃었다. 코로 숨을 내쉬는 정도로.'),
+          SY('normal', '…방금처럼 웃었으면 통과했으려나.'),
+          Y('smile', '방금 거요? 완전 통과죠.'),
+          SY('annoyed', '…보지 마요.'),
+        ],
+      },
+      {
+        text: '"다음엔 무조건 붙어요"라고 말한다', aff: { seoyeon: 2 }, set: { comfort: 'cheer' },
+        then: [
+          Y('serious', '다음엔 무조건 붙어요. 선배 아침 방송 들어 본 사람은 다 알아요.'),
+          SY('normal', '…다들 그렇게 말해요.'),
+          Y('normal', '…'),
+          SY('normal', '고마운데, 좀 대책없네요.'),
+          Y('normal', '…죄송해요.'),
+          SY('normal', '아니. 사과할 건 아니고.'),
+          SY('normal', '…그래도 와 줘서 고마워요.'),
+        ],
+      },
+      {
+        text: '평소처럼 장난을 건다', aff: { seoyeon: 3 }, set: { comfort: 'normal' },
+        then: [
+          Y('smile', '선배, 웃는 거 어색한 건 저도 인정이요.'),
+          SY('surprised', '…뭐?'),
+          Y('smile', '첫 모임 때부터 웃는 거 한 번도 못 봤어요. 아니 한 번 봤나. 엄지 들었을 때.'),
+          SY('annoyed', '그건 웃은 거 아니라니까.'),
+          Y('smile', '그렇게 웃었으면 붙었어요.'),
+          SY('normal', '…'),
+          SY('smile', '…진짜 이상한 사람이네.'),
+          Y('smile', '방금 웃었다.'),
+          SY('annoyed', '안 웃었어요.'),
+        ],
+      },
+    ]),
+    SY('normal', '다음 주 축제 생방송. 내가 MC예요.'),
+    Y('surprised', '…괜찮으세요?'),
+    SY('normal', '괜찮아야죠. 방송은 내 기분이랑 상관없이 나가니까.'),
+    SY('normal', '…기술 메인 콘솔, 도연 씨가 잡아요. 오빠한테 말해 둘게요.'),
+    Y('surprised', '(…방금, 도연 씨라고 했다.)', W),
+    Y('surprised', '제가요? 메인을요?'),
+    SY('normal', '이상한 신입이 옆에 있으면 덜 딱딱해지는 것 같아서요.'),
+    hideAll(),
+
+    /* -------- 그날 밤, 편의점 앞 -------- */
+    bg('campus_gate', 'black'),
+    place('학교 앞 편의점', '오후 11:52'),
+    show('yujin', 'center', 'normal'),
+    narr('방송국을 나와서, 도연은 휴대폰을 한참 들고 있었다.'),
+    Y('normal', '자?', { msg: true, as: '도연' }),
+    J('normal', '아니. 왜', MSG),
+    Y('normal', '그냥', { msg: true, as: '도연' }),
+    J('normal', '이 시간에 그냥 연락하는 사람 너밖에 없는 거 알지', MSG),
+    J('normal', '편의점 앞. 10분.', MSG),
+    narr('나은은 7분 만에 왔다. 슬리퍼에, 후드 모자를 쓰고.'),
+    move('yujin', 'midleft'),
+    show('jia', 'midright', 'normal', { from: 'right' }),
+    J('normal', '무슨 일 있었어?'),
+    Y('normal', '…말하면 안 되는 일.'),
+    J('normal', '그럼 말하지 마.'),
+    narr('나은이 바나나우유 두 개를 사 왔다. 하나는 빨대까지 꽂아서 도연 손에 쥐여 줬다.'),
+    J('normal', '근데 얼굴은 말하고 싶은 얼굴인데.'),
+    Y('normal', '…누가 되게 열심히 했는데, 안 됐어. 근데 나는 아무것도 못 해 줬어.'),
+    J('normal', '옆에 있었잖아.'),
+    Y('surprised', '…어떻게 알아?'),
+    J('smile', '너 원래 그래. 할 말 없으면 옆에 앉아 있어.'),
+    J('normal', '수능 날 기억나? 나 수험표 두고 나온 거.'),
+    Y('surprised', '아… 그거.'),
+    J('normal', '너 그날도 알람 다섯 개 다 끄고 자다가, 우리 엄마 전화 받고 슬리퍼 바람으로 뛰어왔잖아. 내 수험표 들고.'),
+    J('normal', '교문 닫히기 4분 전에.'),
+    Y('smile', '그때 진짜 심장 터지는 줄 알았어.'),
+    J('normal', '근데 너 그날 아무 말도 안 했어. 잘 보라는 말도, 괜찮다는 말도.'),
+    J('normal', '수험표만 쥐여 주고, 내가 건물 들어갈 때까지 교문 앞에 서 있었어.'),
+    J('smile', '시험 끝나고 나왔는데 아직 있더라. 그 앞 편의점 의자에.'),
+    Y('normal', '…점심은 먹었어. 컵라면.'),
+    J('smile', '알아. 국물 자국 묻은 패딩 입고 있었거든.'),
+    J('normal', '나 그래서 지금도 편의점 앞에 오면 좀 안심돼. 웃기지.'),
+    Y('normal', '…'),
+    narr('도연은 그날을 늦잠 잔 날로만 기억하고 있었다. 나은은 그날을 다른 이름으로 기억하고 있었다.'),
+    narr('둘은 편의점 앞 의자에서 우유를 다 마셨다. 나은은 끝까지 그 \'누가\'를 묻지 않았다.'),
+    Y('normal', '(…나은한테 오면 이상하게 다 괜찮아진다. 8년째.)', W),
+    hideAll(),
+
+    /* -------- 축제 전날, 설계실 -------- */
+    bgm('daily'),
+    bg('design_studio', 'black'),
+    place('건축관 4층 설계실', '5월 13일 (수) · 오후 9:10'),
+    show('yujin', 'midleft', 'smile'),
+    show('jia', 'midright', 'normal'),
+    narr('설계실 한쪽에서 1학년 후배 둘이 나은한테 모형을 들고 왔다. 나은은 칼끝으로 기둥 두 개를 옮겨 주고 끝냈다. 후배들이 꾸벅 인사하고 돌아갔다.'),
+    Y('surprised', '…방금 뭐 한 거야?'),
+    J('normal', '기둥이 하중을 못 받게 서 있었어. 저러면 크리틱에서 바로 털려.'),
+    Y('smile', '너 진짜 잘한다. 교수님보다 빨라.'),
+    J('normal', '…나 여름에 공모전 내 보려고. 학생 주거 공모전.'),
+    Y('surprised', '오. 1학년 때 내려다 말았던 거?'),
+    J('smile', '응. 올해는 내 이름으로 하나 내 보고 싶어.'),
+    Y('smile', '내. 무조건 내. 모형 본드는 내가 잡을게.'),
+    J('smile', '30초도 못 버티면서.'),
+    Y('normal', '…근데 난 그런 게 좋더라. 기둥이나 배선 같은 거.'),
+    Y('normal', '아무도 안 쳐다보는데, 없으면 다 무너지는 거. 방송국 들어가서 알았어. 나 그런 거 하는 거 좋아해.'),
+    J('smile', '…너 그거 중3 때 우드락 기둥 세우면서도 똑같이 말했어.'),
+    Y('surprised', '진짜?'),
+    J('normal', '응. 그때부터 그런 애였어, 너.'),
+    Y('smile', '나 축제 때 메인 콘솔 잡는다? 신입이 메인 잡는 거 처음이래.'),
+    J('smile', '오. 대단하다.'),
+    Y('smile', '채연 선배가 나 추천했대. 이상한 신입이 옆에 있으면 덜 딱딱해진다고.'),
+    J('normal', '…'),
+    J('normal', '너 요즘 그 선배 얘기 진짜 많이 한다.'),
+    Y('surprised', '내가?'),
+    J('normal', '응. 하루에 세 번은 해.'),
+    when(leansSeoyeon, [
+      J('normal', '그리고 그 얘기 할 때 너 목소리 좀 낮아져. 진지해져.'),
+      J('smile', '8년 동안 너 그런 목소리 별로 못 들어 봤거든.'),
+    ]),
+    when(leansJia, [
+      J('normal', '…나 원래 이런 거 안 묻잖아. 근데 오늘은 물어볼래.'),
+    ]),
+    J('normal', '…그 선배 좋아해?'),
+
+    // ── 선택지 2 ──────────────────────────────
+    choice('"그 선배 좋아해?" — 나은이 묻는다.', [
+      {
+        text: '"그냥 좋은 선배야. 배울 게 많아."', aff: { jia: 3 }, set: { feel: 'senior' },
+        then: [
+          Y('normal', '좋아하긴. 그냥 좋은 선배야. 배울 게 많아서 그래.'),
+          J('normal', '…그렇구나.'),
+          Y('smile', '왜, 질투 나?'),
+          J('annoyed', '아 무슨 소리야.'),
+          J('smile', '…그냥 물어본 거야.'),
+        ],
+      },
+      {
+        text: '"…모르겠어. 요즘 좀 신경 쓰이긴 해."', aff: { seoyeon: 3, jia: -1 }, set: { feel: 'curious' },
+        then: [
+          Y('normal', '…모르겠어.'),
+          Y('normal', '근데 요즘 좀 신경 쓰이긴 해. 그 선배 혼자 있는 거 보면.'),
+          J('surprised', '…'),
+          J('normal', '…그렇구나.'),
+          J('smile', '너 그런 말 하는 거 처음 들어 봐. 8년 동안.'),
+          J('normal', '…그 선배, 좋은 사람 같긴 하더라. 방송 들어 보면.'),
+          Y('surprised', '그런가?'),
+          J('smile', '응. 처음이야.'),
+          narr('나은은 웃고 있었다. 모형 칼을 쥔 손에 힘이 들어가 있었다.'),
+        ],
+      },
+      {
+        text: '"뭐야, 너 질투해?ㅋㅋ"', aff: { jia: 2 }, set: { feel: 'jealous' },
+        then: [
+          Y('smile', '뭐야ㅋㅋ 너 질투해?'),
+          J('surprised', '…'),
+          J('annoyed', '…'),
+          J('normal', '…응. 좀.'),
+          Y('surprised', '어?'),
+          J('smile', '농담이야.'),
+          Y('smile', '아 깜짝이야.'),
+          J('smile', '…응. 농담.'),
+        ],
+      },
+    ]),
+    J('normal', '축제 마지막 날 불꽃놀이 하잖아.'),
+    Y('normal', '응. 나 그날도 방송인데.'),
+    J('normal', '…불꽃놀이 시작하기 전에, 10분만 시간 내 줘.'),
+    Y('surprised', '10분? 왜?'),
+    J('serious', '할 말 있어.'),
+    Y('surprised', '지금 하면 안 돼?'),
+    J('smile', '안 돼. 그날 해야 돼.'),
+    hideAll(),
+
+    /* -------- 축제 -------- */
+    bgm('daily'),
+    bg('festival_booth', 'black'),
+    place('대동제 · YSBS 중계 부스', '5월 14일 (목) · 오후 6:00'),
+    narr('축제 첫날. 무대 옆 중계 부스에서 도연은 메인 콘솔 앞에 앉아 있었다.'),
+    narr('콘솔 옆에 삼각김밥 하나가 놓여 있었다. 아까 채연이 큐 카드를 두고 간 자리였다.'),
+    narr('콘솔 위엔 도연이 그린 중계 부스 배선도가 붙어 있었다. 설계 과제 하듯 자를 대고 그린, 선마다 번호를 단 평면도였다.'),
+    show('seoyeon', 'midright', 'normal'),
+    show('yujin', 'midleft', 'normal'),
+    M('근데 이 배선도 너가 그렸냐? 선마다 번호까지 달았네. 내년부터 이거 매뉴얼로 쓰자.'),
+    Y('smile', '건축과 2년이면 도면은 좀 그려요. 케이블 꼬이는 거 보기 싫어서요.'),
+    narr('채연이 배선도를 한참 들여다봤다.'),
+    SY('normal', '…이런 것도 그리는 사람이었네요.'),
+    M('신입 긴장했어? 손 떨리면 말해. 내가 옆에 있을게.'),
+    Y('normal', '괜찮아요. 아니 사실 좀 떨려요.'),
+    SY('normal', '나도 떨려요.'),
+    Y('surprised', '선배도요?'),
+    SY('normal', '매번 떨려요. 티를 안 낼 뿐이지.'),
+    when(is('comfort', 'stay'), [
+      narr('채연은 큐 카드를 정리하다 말고, 도연 옆 빈 의자에 잠깐 앉았다. 아무 말 없이, 30초쯤.'),
+      SY('normal', '…그날 부스에서. 고마웠어요. 말 안 해 줘서.', W),
+    ]),
+    when(is('comfort', 'normal'), [
+      SY('normal', '오늘 나 웃는 거 어색하면 엄지 들어요.', W),
+      Y('smile', '진짜 들어요?', W),
+      SY('normal', '…아뇨.', W),
+    ]),
+    when(is('comfort', 'cheer'), [
+      SY('normal', '그날은 미안했어요. 좋은 말 해 준 건데.', W),
+      Y('normal', '아니에요. 제가 눈치가 없었어요.', W),
+    ]),
+    sfx('onair'),
+    narr('ON AIR. 채연이 무대 위로 올라갔다. 첫 멘트에서 채연은 웃었다. 어색하지 않게.'),
+    M('…오. 쟤 오늘 좀 다르다.'),
+    Y('smile', '그쵸.'),
+
+    show('jia', 'center', 'smile', { from: 'left' }),
+    J('smile', '배달 왔습니다~ 건축과 주점 떡볶이.'),
+    G('김도연 방송국 스타 됐다며? 언니가 응원 왔다!'),
+    Y('smile', '헐 나은아, 언니! 감사해요!'),
+    J('normal', '너 저녁 안 먹었지. 이거 먹어. 어묵 많이 넣었어.'),
+    narr('나은의 시선이 콘솔 옆 삼각김밥에 잠깐 머물렀다.'),
+    when(leansSeoyeon, [
+      J('smile', '…누가 벌써 챙겨 줬네.'),
+      J('normal', '그래도 이것도 먹어. 그거로는 안 돼.'),
+    ]),
+    M('오, 이분은? 여자친구?'),
+    J('surprised', '…네?'),
+    Y('smile', '아 아니에요! 같은 과 친구요. 8년 친구.'),
+    M('아~ 반가워요, 8년 친구.'),
+    J('shy', '…안녕하세요.'),
+    narr('무대에서 내려온 채연이 나은을 봤다. 나은도 채연을 봤다. 둘 다 짧게 고개만 숙였다.'),
+    narr('채연은 다음 큐 카드를 넘기다 말고, 떡볶이를 나눠 먹는 둘을 봤다. 같은 장을 두 번 넘겼다.'),
+    when(is('letter', 'give'), [
+      narr('채연의 시선이 나은 손에 감긴 밴드에 잠깐 머물렀다.'),
+    ]),
+    hideAll(),
+
+    /* -------- 마지막 밤 -------- */
+    bgm('heart'),
+    bg('festival_stage', 'black'),
+    place('대동제 마지막 날 · 대운동장', '5월 16일 (토) · 오후 8:50'),
+    narr('불꽃놀이 10분 전. 운동장은 사람으로 꽉 차 있었다.'),
+    when(leansJia, [
+      Y('normal', '(10분 달라던 나은 얼굴이 하루 종일 생각났다. 무슨 말일지, 알 것 같으면서도 모르겠다.)', W),
+    ], [
+      when(leansSeoyeon, [
+        Y('normal', '(무대 위 선배를 보면, 큐 사인보다 손이 먼저 나간다. …이게 무슨 기분인지, 아직은 모르겠다.)', W),
+      ], [
+        Y('normal', '(오늘 둘 다 나한테 뭔가 말하려는 얼굴이었다. 나는 누구한테 먼저 가고 싶은 걸까.)', W),
+      ]),
+    ]),
+    show('yujin', 'midleft', 'normal'),
+    show('jia', 'midright', 'normal'),
+    J('normal', '왔네.'),
+    Y('smile', '10분 내 달라며. 콘솔 오빠한테 잠깐 맡기고 왔어.'),
+    J('normal', '…응.'),
+    narr('둘은 한동안 말없이 운동장을 봤다. 나은은 몇 번 입을 열었다가 닫았다. 무대 쪽에서 채연의 멘트가 바람에 실려 왔다.'),
+    when(leansSeoyeon, [
+      J('normal', '…너 요즘 방송국 얘기할 때 얼굴 달라. 나 그거 알면서 하는 말이야.'),
+    ]),
+    J('normal', '있잖아, 도연아.'),
+    J('normal', '8년 전에, 중학교 1학년 때. 너가 처음으로 나한테 말 건 거 기억나?'),
+    Y('normal', '음… 급식실?'),
+    J('smile', '응. 내가 우유 쏟았는데 너가 \'나도 저번에 쏟았어\' 하면서 휴지 줬어.'),
+    Y('smile', '아 기억나. 너 울 것 같은 얼굴이었어.'),
+    J('normal', '그날부터—'),
+    narr('8시 56분. 허리춤의 무전기가 지직거렸다.'),
+    say('minhyuk', null, '김도연, 들려? 메인 마이크 나갔어. 채연이 무대 위에 그냥 서 있어.', WALKIE),
+    fx('shake'),
+    Y('surprised', '…!'),
+    J('surprised', '…'),
+    say('minhyuk', null, '예비 라인 내가 돌리는 중인데, 나 혼자면 5분. 배선 그린 너 오면 2분이야. 카운트다운까진 4분.', WALKIE),
+    say('minhyuk', null, '못 오면 내가 어떻게든 살릴게. 판단은 네가 해.', WALKIE),
+    Y('normal', '…'),
+    J('normal', '…'),
+    J('serious', '…가지 마.'),
+    J('normal', '선배 방송 망치라는 거 아니야. 국장님 계시잖아.'),
+    J('sad', '그냥… 지금 안 하면, 나 다시는 못 할 것 같아서.'),
+    when(leansJia, [
+      J('normal', '…8년 동안 맨날 내가 너 먼저 챙겼잖아. 이번 한 번만, 내가 너 붙잡을게.'),
+    ]),
+
+    // ── 선택지 3 ──────────────────────────────
+    choice('무전기에서 민혁의 목소리가, 눈앞엔 나은이.', [
+      {
+        text: '나은 옆에 남는다', aff: { jia: 6, seoyeon: -2 }, set: { last: 'jia' },
+        then: [
+          Y('normal', '…오빠, 죄송해요. 예비 라인 부탁드려요. 지금은 여기 있어야 될 것 같아요.'),
+          say('minhyuk', null, '…알았어. 내가 살릴게. 신경 쓰지 마.', WALKIE),
+          narr('도연이 무전기를 끈다.'),
+          J('surprised', '…'),
+          J('surprised', '진짜 안 가?'),
+          Y('normal', '네가 가지 말라며.'),
+          J('shy', '…'),
+          narr('9시. 하늘은 조용했다. 운동장 여기저기서 "뭐야, 안 해?" 하는 웅성거림이 번졌다.'),
+          narr('9시 1분. 스피커에서 지직, 소리가 나더니 채연의 목소리가 돌아왔다. "기다려 주셔서 감사합니다." 민혁이 혼자 5분 만에 살려 낸 소리였다.'),
+          narr('셋. 둘. 하나.'),
+          narr('첫 불꽃이 터졌다. 나은의 얼굴이 하얗게 밝아졌다가, 다시 어두워졌다.'),
+          J('normal', '…그날부터 좋아했어. 너.'),
+          J('shy', '…대답은 지금 하지 마. 월요일에 해 줘.'),
+        ],
+      },
+      {
+        text: '무대로 뛰어간다', aff: { seoyeon: 6, jia: -2 }, set: { last: 'seoyeon' },
+        then: [
+          Y('serious', '나은아, 미안. 지금은 선배 옆에 있어야 될 것 같아. 갔다 와서 꼭 들을게.'),
+          J('surprised', '…'),
+          J('smile', '…응. 가.'),
+          hide('jia'),
+          bg('festival_booth', 'cross'),
+          place('YSBS 중계 부스', '오후 8:57'),
+          show('yujin', 'midleft', 'serious'),
+          M('왔냐! 예비 반쯤 했어.'),
+          Y('serious', '메인 라인 리셋하고 예비로 넘길게요. 30초.'),
+          M('됐다! 소리 들어온다!'),
+          show('seoyeon', 'midright', 'surprised'),
+          narr('무대 위 채연이 부스 쪽을 돌아봤다. 도연이 엄지를 들었다.'),
+          narr('채연이 웃었다. 이번엔 진짜로, 화면에 나가도 될 만큼.'),
+          narr('8시 58분, 소리가 돌아왔다. 채연은 남은 2분을 멘트로 채웠다. 9시 정각.'),
+          say('seoyeon', null, '연서대 여러분, 기다려 주셔서 감사합니다. 지금부터 마지막 카운트다운 시작하겠습니다.', { as: '무대 · 채연' }),
+          narr('셋. 둘. 하나. 첫 불꽃이 터졌다.'),
+          narr('휴대폰엔 나은의 메시지가 와 있었다.'),
+          J('normal', '불꽃 예쁘다. 수고했어', MSG),
+          J('normal', '선배 목소리 잘 나오더라', MSG),
+          narr('할 말이 뭐였는지는, 적혀 있지 않았다.'),
+        ],
+      },
+      {
+        text: '"5분만 기다려. 꼭 돌아올게."', aff: { jia: 2, seoyeon: 2 }, set: { last: 'wait' },
+        then: [
+          Y('serious', '나은아, 5분만. 마이크만 살리고 바로 올게. 진짜 바로.'),
+          J('normal', '…'),
+          J('smile', '…알았어. 여기 있을게.'),
+          hide('jia'),
+          narr('도연은 뛰었다. 8시 57분에 부스에 닿았고, 마이크는 8시 58분에 살아났다. 카운트다운은 9시 정각에 시작됐다.'),
+          narr('첫 불꽃이 터지는 걸 확인하고, 도연은 다시 뛰었다. 하늘만 보고 선 사람들 사이를 헤치고, 아까 그 자리로.'),
+          show('jia', 'midright', 'normal'),
+          J('surprised', '…진짜 왔네.'),
+          Y('normal', '5분 안 넘었지?'),
+          J('smile', '7분.'),
+          Y('annoyed', '…2분 봐주라.'),
+          J('smile', '봐줄게.'),
+          narr('불꽃은 아직 한창이었다. 도연은 숨이 차 있었다.'),
+          Y('normal', '…할 말. 이제 해.'),
+          J('normal', '…'),
+          J('normal', '다음에 할게.'),
+          Y('surprised', '왜? 여기까지 뛰어왔는데.'),
+          J('smile', '그러니까. 너 방금 두 군데 다 챙기려고 운동장을 두 바퀴 뛰었잖아.'),
+          J('normal', '지금 말하면, 너 또 뭘 골라야 되잖아.'),
+          J('smile', '내 말이 너한테 숙제가 되는 건 싫어. 너 숨 고르면 할게.'),
+          Y('surprised', '…'),
+        ],
+      },
+    ]),
+    hideAll(),
+    jump('ch3_end'),
+  ]);
+
+  /* ---------------------------------------------------------
+   *  공통 루트 종료 → 루트 분기
+   * --------------------------------------------------------- */
+  VN.label('ch3_end', [
+    jump('route_split'),
+  ]);
+})();
+
+</script>
+<script>/* ==== js/story/hidden.js ==== */
+/* =============================================================
+ *  HIDDEN ENDINGS — 한 인물에게 선택을 집중하면 열리는 엔딩
+ *
+ *  선택지마다 누구 쪽 선택인지 아래 LEAN 표에 적혀 있습니다.
+ *  한 사람 쪽 선택지가 있는 곳은 각자 9번(10번 중 1번은 상대 전용).
+ *
+ *  열리는 조건 (routes.js 의 route_split 이 루트보다 먼저 검사)
+ *   1) 마지막 선택(3-3)에서 그 사람을 골랐을 것
+ *   2) 그 사람 쪽 선택 9번 중 7번 이상  → 한두 번은 다르게 골라도 됨
+ *   3) 상대 쪽 선택은 1번 이하         → '대부분 집중'했을 때만
+ *  선택지별 점수 배분이 다르므로 달성 가능성은 별도 테스트로 확인해야 합니다.
+ * ============================================================= */
+(() => {
+  const { say, narr, show, move, hide, hideAll, bg, place, chapter, bgm, sfx, endcard, when } = VN.dsl;
+  const Y = (f, t, o) => say('yujin', f, t, o);
+  const J = (f, t, o) => say('jia', f, t, o);
+  const SY = (f, t, o) => say('seoyeon', f, t, o);
+  const M = (t, o) => say('minhyuk', null, t, o);
+  const W = { whisper: true };
+
+  /** 플래그 값 → 누구 쪽 선택인지 */
+  const LEAN = {
+    q:       { ask: 'seoyeon', caught: 'jia' },
+    why:     { serious: 'jia' },
+    film:    { jia: 'jia', dawn: 'seoyeon', advice: 'seoyeon' },
+    sat:     { seoyeon: 'seoyeon', jia: 'jia' },
+    letter:  { skip: 'jia', give: 'seoyeon' },
+    night:   { help: 'seoyeon', leave: 'jia' },
+    walk:    { jia: 'jia', seoyeon: 'seoyeon' },
+    comfort: { stay: 'seoyeon' },
+    feel:    { senior: 'jia', jealous: 'jia', curious: 'seoyeon' },
+    last:    { jia: 'jia', seoyeon: 'seoyeon' },
+  };
+  const NEED = { jia: 7, seoyeon: 7 };   // 9번 중 이만큼은 그 사람 쪽
+  const RIVAL_MAX = 1;                    // 상대 쪽 선택은 이 횟수까지만
+
+  function leanCount(s, who) {
+    return Object.entries(LEAN).filter(([k, m]) => m[s.flags[k]] === who).length;
+  }
+  function qualifies(s, who) {
+    const other = who === 'jia' ? 'seoyeon' : 'jia';
+    return s.flags.last === who
+      && leanCount(s, who) >= NEED[who]
+      && leanCount(s, other) <= RIVAL_MAX;
+  }
+  VN.hiddenOf = (s) => {
+    if (qualifies(s, 'jia')) return 'jia';
+    if (qualifies(s, 'seoyeon')) return 'seoyeon';
+    return null;
+  };
+  VN.leanCount = leanCount;
+
+  /* ---------------- 나은 히든 : 커피 줄 ---------------- */
+  VN.label('hidden_jia', [
+    chapter('HIDDEN', '커피 줄', ''),
+    bgm('heart'),
+    bg('campus_gate', 'black'),
+    place('연서대학교 정문', '5월 18일 (월) · 오전 8:50'),
+    show('yujin', 'center', 'normal'),
+    narr('정문 앞. 이번엔 도연이 먼저 와 있었다. 손에 컵 하나를 들고.'),
+    Y('normal', '아침 8시 50분.'),
+    Y('smile', '…이거 은근 떨리네.'),
+    move('yujin', 'midleft'),
+    show('jia', 'midright', 'surprised', { from: 'right' }),
+    narr('나은이 양손에 커피를 하나씩 들고 걸어왔다. 8년 동안 그랬던 것처럼.'),
+    J('surprised', '…웬일로 먼저 왔어?'),
+    Y('smile', '알람 하나로 일어났어.'),
+    J('surprised', '거짓말.'),
+    Y('smile', '진짜야. 그리고 이거.'),
+    narr('도연이 컵을 내밀었다. 바닐라라떼였다.'),
+    J('surprised', '…'),
+    when((s) => s.flags.film === 'jia', [
+      Y('smile', '커피 열 잔 사 준다고 했잖아. 연습 상대 해 주면. 그 첫 잔.'),
+    ], [
+      Y('smile', '너 거. 바닐라라떼. 맞지?'),
+    ]),
+    J('surprised', '…너 그거 어떻게 알아. 한 번도 안 물어봤잖아.'),
+    Y('normal', '8년을 봤는데 그걸 물어봐야 알아?'),
+    J('shy', '…'),
+    narr('나은이 컵을 받았다. 그러고는 자기가 들고 온 컵 하나를 도연 손에 쥐여 줬다. 나은 손에는 바닐라라떼만 두 잔이 남았다.'),
+    J('smile', '…웃기다. 나 지금 라떼 두 잔이야.'),
+    Y('smile', '8년치 중에 한 잔 갚은 거야. 아직 많이 남았어.'),
+    narr('도연이 한 모금 마셨다. 안 달았다. 딱 좋았다. 8년 동안 매번 그랬다.'),
+    Y('normal', '이거. 알바생이 센스 있는 게 아니었지.'),
+    J('surprised', '…'),
+    Y('normal', '너가 시킨 거잖아. 내 입맛에 맞게.'),
+    J('normal', '…사연. 알았어?'),
+    when((s) => s.flags.letter === 'skip', [
+      Y('normal', '응. 내가 사연함에 다시 넣어 놨던 그거.'),
+    ]),
+    when((s) => s.flags.letter === 'air', [
+      Y('normal', '응. 내가 점심 방송에 틀어 버렸던 그거. 그걸 내 손으로 틀었다니.'),
+    ]),
+    when((s) => s.flags.letter === 'give', [
+      Y('normal', '응. 채연 선배가 방송 대신 보관해 둔 그거.'),
+    ]),
+    Y('normal', '토요일에 불꽃 터질 때 알았어. 내 커피를 내 입맛대로 시키는 사람이 너 말고 누가 있어.'),
+    Y('normal', '근데 커피 하나로 안 거 아니야.'),
+    Y('normal', '어제 하루 종일 하나씩 세 봤거든. 시간표 봐 준 거, 돈가스 한 조각, 알람 다섯 개 아는 거, 편의점 바나나우유.'),
+    Y('normal', '다 너였더라. 8년 동안.'),
+    J('surprised', '…'),
+    Y('normal', '그리고 혼자 시켜먹어봤는데 너무 달더라.'),
+    when((s) => s.flags.letter === 'skip', [
+      J('shy', '…그 친구 진짜 둔하네.'),
+    ], [
+      J('shy', '…그 친구 진짜 둔하다며.'),
+    ]),
+    Y('smile', '응. 진짜 둔했다.'),
+    Y('normal', '웃긴 거 하나 더 있어. 나 필통에 밴드 넣고 다니잖아.'),
+    Y('normal', '그거 너 때문이야. 너 맨날 베니까. 그걸 나는 아무렇지 않게 하고 있었어.'),
+    J('surprised', '…'),
+    J('normal', '…'),
+    Y('normal', '그리고 대답, 월요일에 해 달라고 했잖아.'),
+    J('normal', '…응.'),
+    when(Object.assign((s) => s.flags.walk === 'jia' && s.flags.letter === 'air', { __desc: '나은과 벚꽃길 + 사연을 방송에 추천' }), [
+      Y('normal', '벚꽃길에서 내가 그랬지. 나 그렇게 둔하지 않다고.'),
+      Y('smile', '…엄청 둔했더라.'),
+      Y('serious', '그러니까 이번엔 직접 할게.'),
+    ]),
+    when(Object.assign((s) => s.flags.walk === 'jia' && s.flags.letter === 'give', { __desc: '나은과 벚꽃길 + 사연을 채연에게 맡김' }), [
+      Y('normal', '벚꽃길에서 내가 그랬지. 진짜 친구면 말해도 안 잃는다고.'),
+      Y('serious', '그러니까 직접 할게. 안 잃을 자신 있어서.'),
+    ]),
+    when(Object.assign((s) => s.flags.letter === 'skip', { __desc: '사연을 뺌' }), [
+      Y('normal', '내가 그랬지. 그런 건 라디오 말고 직접 들어야 된다고.'),
+      Y('serious', '그러니까 직접 할게.'),
+    ]),
+    when(Object.assign((s) => s.flags.walk !== 'jia' && s.flags.letter === 'air', { __desc: '사연을 방송에 추천 (벚꽃길 아님)' }), [
+      Y('normal', '그 사연, 점심에 라디오로 들었을 때 나 하나도 못 알아들었잖아.'),
+      Y('serious', '그러니까 이번엔 라디오 말고 직접 할게.'),
+    ]),
+    when(Object.assign((s) => s.flags.walk !== 'jia' && s.flags.letter === 'give', { __desc: '사연을 채연에게 맡김 (벚꽃길 아님)' }), [
+      Y('normal', '채연 선배가 그랬잖아. 그런 건 라디오 말고 직접 말해야 된다고.'),
+      Y('serious', '그러니까 직접 할게.'),
+    ]),
+    Y('serious', '네가 오래 좋아해 줘서 하는 말 아니야.'),
+    Y('serious', '나도 좋아해, 나은아. 그걸 이제야 알았을 뿐이야.'),
+    J('surprised', '…'),
+    J('sad', '…아 진짜.'),
+    J('smile', '정문 앞에서 이러는 게 어딨어. 사람 다 보는데.'),
+    Y('smile', '나 아침 8시 50분에 와 있는 것도 처음이야.'),
+    J('smile', '…'),
+    endcard({
+      id: 'hidden_jia', kicker: 'HIDDEN ENDING', title: '커피 줄',
+      text: '8년 만에, 더는 친구가 아니게 됐다.',
+      next: '마지막에 나은 곁에 남고, 나은 쪽 선택 7번 이상 · 채연 쪽 선택 1번 이하일 때 열리는 엔딩',
+    }),
+  ]);
+
+  /* ---------------- 채연 히든 : 7시 뉴스 ---------------- */
+  VN.label('hidden_seoyeon', [
+    chapter('HIDDEN', '7시 뉴스', '2년 뒤'),
+    bgm('night'),
+    bg('club_room_night', 'black'),
+    place('YSBS 주조정실', '2년 뒤 3월 2일 · 오전 6:58'),
+    show('yujin', 'midleft', 'normal'),
+    narr('개강 첫날. 4학년이 된 도연은 YSBS 기술부장이 되어 있었다.'),
+    narr('채연 선배는 그해 겨울 처음으로 카메라 테스트를 넘었지만 최종 면접에서 떨어졌다. 이듬해 봄에 한 번 더 떨어졌고, 작년 가을에 붙었다.'),
+    narr('연수를 마친 신입 아나운서의 첫 고정은 라디오 7시 뉴스였다.'),
+    narr('콘솔 옆 휴대폰에선 라디오 앱이 켜져 있었다.'),
+    M('부장님~ 첫 방송 준비됐어?', { msg: true, as: '민혁 · 메시지' }),
+    Y('smile', '(…오빠는 졸업했는데 아직도 단톡에 있네.)', W),
+    narr('6시 59분 50초. 도연은 볼륨을 올렸다.'),
+    sfx('onair'),
+    say('seoyeon', null, '7시 뉴스입니다. 아나운서 정채연입니다.', { as: '라디오' }),
+    Y('surprised', '…떴다.'),
+    say('seoyeon', null, '오늘 서울 낮 최고 기온은 11도. 아침저녁은 아직 쌀쌀합니다. 개강하신 분들, 겉옷 꼭 챙기세요.', { as: '라디오' }),
+    Y('smile', '…'),
+    narr('뉴스는 3분 만에 끝났다. 틀린 곳은 한 군데도 없었다.'),
+    say('seoyeon', null, '들었어?', { msg: true, as: '채연' }),
+    Y('smile', '처음부터요. 날씨 멘트 좋던데요. 겉옷 꼭 챙기세요~', { msg: true, as: '도연 · 답장' }),
+    say('seoyeon', null, '따라 하지 마', { msg: true, as: '채연' }),
+    say('seoyeon', null, '너 오늘도 반팔이지', { msg: true, as: '채연' }),
+    Y('surprised', '…어떻게 알았지.'),
+    when((s) => s.flags.comfort === 'stay', [
+      narr('재작년 겨울, 최종 면접에서 떨어진 날. 부스에서 마이크를 끈 채 선배가 먼저 말했다. "레벨 체크해요." 도연은 그날 처음으로 선배 손을 잡았다. 선배가 말을 놓은 것도 그날부터였다.'),
+    ]),
+    when((s) => s.flags.comfort === 'cheer', [
+      narr('재작년 겨울, 최종 면접에서 떨어진 날. 부스에서 선배가 먼저 말했다. "다음엔 무조건 붙는다며. …이번엔 네가 틀렸네." 도연은 그날 처음으로 선배 손을 잡았다. 선배가 말을 놓은 것도 그날부터였다.'),
+    ]),
+    when((s) => s.flags.comfort === 'normal', [
+      narr('재작년 겨울, 최종 면접에서 떨어진 날. 부스에서 선배가 먼저 물었다. "나 지금 웃는 거, 어색해?" 도연은 엄지를 드는 대신 선배 손을 잡았다. 선배가 말을 놓은 것도 그날부터였다.'),
+    ]),
+    narr('작년 가을, 붙은 날엔 선배가 먼저 전화했다. 첫마디는 "들었어?"였다.'),
+    narr('7시 28분. 신입 아나운서가 부스에 들어왔다. 손이 덜덜 떨리고 있었다.'),
+    say('rookie', null, '…부장님, 저 진짜 못 하겠어요. 정채연 선배님처럼은.'),
+    Y('normal', '떨려요? 나도 떨려요. 티를 안 낼 뿐이지.'),
+    Y('smile', '내가 손 들면 시작해요.'),
+    narr('7시 30분. ON AIR. 도연이 페이더를 밀어 올렸다.'),
+    hideAll(),
+
+    bgm('heart'),
+    bg('club_room', 'black'),
+    place('YSBS 방송국', '오전 8:10'),
+    show('yujin', 'midleft', 'normal'),
+    narr('방송이 끝나고 콘솔 정리를 하는데, 문이 열렸다.'),
+    narr('신입 아나운서가 먼저 알아보고 벌떡 일어났다.'),
+    say('rookie', null, '배, 정채연 선배님! 아까 7시 뉴스 들었습니다!'),
+    show('seoyeon', 'midright', 'normal', { from: 'right' }),
+    SY('normal', '고마워요. 오늘 방송도 들었어요. 첫 고정 치고 괜찮았어요. 숨 쉬는 자리만 조금 더 연습해요.'),
+    say('rookie', null, '네! 감사합니다!'),
+    narr('신입이 꾸벅 인사하고 나갔다. 문이 닫혔다. 선배의 어깨가 한 칸 내려왔다.'),
+    narr('방송국 사람들 앞에서 선배는 여전히 \'정채연 아나운서\'였다. 그 말투가 풀리는 데는 문 닫히는 소리면 충분했다.'),
+    Y('surprised', '…선배? 출근 안 해요?'),
+    SY('normal', '오늘 오후 출근이야. 지나가는 길.'),
+    Y('smile', '방송국에서 여기까지 지나가는 길이에요?'),
+    SY('annoyed', '…지나가는 길이라니까.'),
+    narr('톡, 하고 콘솔 위에 비타민 음료가 놓였다.'),
+    SY('normal', '기술부장님 새학기 첫 방송. 사고 나면 경위서 써야 되니까.'),
+    Y('smile', '고마워요.'),
+    narr('채연이 콘솔 위 도연의 휴대폰을 집어 알람 목록을 훑었다. 여섯 개.'),
+    SY('normal', '아직도 여섯 개네.'),
+    Y('smile', '선배 아침 방송 들으려고 하나 늘린 거요. 2년째 못 줄였어요.'),
+    SY('annoyed', '…이제 나 아침 방송 안 하는데.'),
+    Y('smile', '7시 뉴스 하잖아요.'),
+    narr('채연은 아무렇지 않게 도연 목에 걸린 헤드폰 줄을 바로 펴 줬다. 2년 동안 하던 손이었다.'),
+    Y('smile', '…아까 뉴스, 진짜 좋았어요.'),
+    SY('normal', '알아.'),
+    narr('채연이 피식 웃었다.'),
+    SY('normal', '저녁에 학교 앞으로 와. 오늘은 내가 살게.'),
+    Y('smile', '무슨 날이에요?'),
+    SY('normal', '그냥, 보고싶잖아.'),
+    endcard({
+      id: 'hidden_seoyeon', kicker: 'HIDDEN ENDING', title: '7시 뉴스',
+      text: '선배는 지금, 내 여자친구다.',
+      next: '마지막에 무대로 달려가고, 채연 쪽 선택 7번 이상 · 나은 쪽 선택 1번 이하일 때 열리는 엔딩',
+    }),
+  ]);
+})();
+
+</script>
+<script>/* ==== js/story/routes.js ==== */
+/* =============================================================
+ *  ROUTES — 공통 루트(프롤로그~3장) 이후 개별 루트 분기
+ *
+ *  3장 마지막 선택(flags.last)과 호감도 상승량으로 결정합니다.
+ *  - 나은 옆에 남음  + 나은 호감도 상승 15 이상  → 나은 루트
+ *  - 무대로 뛰어감   + 채연 호감도 상승 15 이상  → 채연 루트
+ *  - 5분만 기다려    → 둘 중 더 높은 쪽(5 이상 차이 + 15 이상)
+ *  - 그 외           → 노멀 엔딩
+ *
+ *  새 루트 챕터를 쓰면 아래 'jia_route' / 'seoyeon_route' 안의
+ *  endcard 를 jump('jia_ch4') 처럼 바꿔서 이어 가면 됩니다.
+ * ============================================================= */
+(() => {
+  const { say, narr, show, move, hideAll, bg, place, when, jump, endcard, bgm } = VN.dsl;
+  const MSG_Y = { msg: true, as: '도연' };
+  const J = (f, t, o) => say('jia', f, t, o);
+  const SY = (f, t, o) => say('seoyeon', f, t, o);
+  const Y = (f, t, o) => say('yujin', f, t, o);
+
+  const RULE = { min: 15, margin: 5 };
+
+  function routeOf(s) {
+    const j = VN.gain('jia'), sy = VN.gain('seoyeon');
+    const last = s.flags.last;
+    if (last === 'jia' && j >= RULE.min) return 'jia';
+    if (last === 'seoyeon' && sy >= RULE.min) return 'seoyeon';
+    if (last === 'wait') {
+      if (j >= RULE.min && j >= sy + RULE.margin) return 'jia';
+      if (sy >= RULE.min && sy >= j + RULE.margin) return 'seoyeon';
+    }
+    return null;
+  }
+  VN.routeOf = routeOf;
+
+  VN.label('route_split', [
+    when((s) => VN.hiddenOf && VN.hiddenOf(s) === 'jia' && s.flags.last === 'jia', [jump('hidden_jia')]),
+    when((s) => VN.hiddenOf && VN.hiddenOf(s) === 'seoyeon' && s.flags.last === 'seoyeon', [jump('hidden_seoyeon')]),
+    when((s) => routeOf(s) === 'seoyeon', [jump('seoyeon_route')]),
+    when((s) => routeOf(s) === 'jia', [jump('jia_route')]),
+    jump('normal_end'),
+  ]);
+
+  /* ---------------- 나은 루트 (도입) ---------------- */
+  VN.label('jia_route', [
+    bgm('heart'),
+    bg('jia_room', 'black'),
+    place('그날 밤', '5월 16일 (토) · 오후 11:50'),
+    show('jia', 'center', 'normal'),
+    when((s) => s.flags.last === 'jia', [
+      J('normal', '…말해 버렸다.'),
+      J('shy', '8년 만에.'),
+      J('normal', '대답은… 월요일에 듣기로 했는데.'),
+      J('normal', '월요일 아침 커피는 두 잔이겠지. 늘 그랬던 것처럼.'),
+      J('sad', '…근데 그날부터 그게, 늘 그랬던 거로 남을까.'),
+    ], [
+      J('normal', '다음에 하겠다고 했는데.'),
+      J('smile', '…7분 만에 돌아왔네. 진짜로.'),
+      J('normal', '두 군데 다 챙기는 애. 그래서 좋아하는 건데, 그래서 말을 못 하겠어.'),
+    ]),
+    narr('휴대폰이 짧게 울렸다.'),
+    say('yujin', null, '월요일 아침 8시 50분에 정문', MSG_Y),
+    say('yujin', null, '커피는 내가 살게. 너 뭐 마셔?', MSG_Y),
+    J('surprised', '…'),
+    J('smile', '8년 동안 한 번도 안 물어보더니.'),
+    narr('나은은 답장을 세 번 지웠다가 썼다. 그리고 메모장을 열었다. 몇 년째 맨 위에 있던 한 줄 옆에, 처음으로 체크 표시가 생겼다.'),
+    endcard({
+      id: 'jia_route_start', kicker: 'NAEUN ROUTE', title: '나은 루트',
+      text: '8년째 같던 아침이, 월요일부터 조금 달라진다.',
+      next: '나은 루트 · 다음 업데이트에서 이어집니다',
+    }),
+  ]);
+
+  /* ---------------- 채연 루트 (도입) ---------------- */
+  VN.label('seoyeon_route', [
+    bgm('night'),
+    bg('club_room_night', 'black'),
+    place('축제가 끝난 밤, YSBS 주조정실', '5월 16일 (토) · 오후 11:30'),
+    show('seoyeon', 'center', 'normal'),
+    narr('채연은 오늘 생방송 녹화본을 돌려 보고 있었다. 마이크가 살아난 순간, 화면 속 자기가 웃고 있었다.'),
+    SY('normal', '…이 얼굴이면 붙었겠네.'),
+    narr('화면 구석, 중계 부스 유리창 너머로 콘솔을 붙잡은 손이 찍혀 있었다. 채연은 거기서 영상을 멈췄다.'),
+    hideAll(),
+    bg('campus_path', 'black'),
+    place('방송국 앞 계단', '오후 11:50'),
+    show('yujin', 'midleft', 'normal'),
+    narr('장비 철수가 끝난 방송국 앞. 도연이 계단에 앉아 있는데, 옆에 누가 앉았다.'),
+    show('seoyeon', 'midright', 'normal', { from: 'right' }),
+    narr('채연이 컵 하나를 내밀었다.'),
+    SY('normal', '바닐라 샷추가. 시럽 덜.'),
+    Y('surprised', '…이거 제 거 맞는데. 어떻게—'),
+    SY('normal', '맨날 들고 오잖아. 컵에 적혀 있던데.'),
+    narr('선배는 자기가 방금 말을 놓은 줄 모르는 것 같았다.'),
+    when((s) => s.flags.comfort === 'cheer', [
+      SY('normal', '…다음엔 무조건 붙는다고 했지, 그때.'),
+      SY('normal', '오늘은 그 말 좀 믿어 보고 싶어졌어.'),
+    ]),
+    when((s) => s.flags.comfort === 'stay', [
+      narr('한동안 둘 다 말이 없었다. 부스에서 그랬던 것처럼, 그게 어색하지 않았다.'),
+    ]),
+    when((s) => s.flags.comfort === 'normal', [
+      SY('normal', '오늘 웃는 거. 어땠어?'),
+      Y('smile', '완전 통과요.'),
+      SY('smile', '…알아. 부스에서 보고 있는 거 다 보였어.'),
+    ]),
+    SY('normal', '다음 공채. 모니터링 해 줄 수 있어?'),
+    Y('surprised', '제가요?'),
+    SY('normal', '네가 보고 있으면, 덜 딱딱해지니까.'),
+    SY('normal', '…그리고 이건 부탁 아니고.'),
+    SY('normal', '내일도 방송국 와. 그 자리 비어 있는 거, 보기 싫어서.'),
+    Y('surprised', '…선배, 아까부터 반말하시는 거 알아요?'),
+    SY('surprised', '…'),
+    SY('normal', '…싫어요?'),
+    Y('smile', '아뇨.'),
+    SY('normal', '그럼 됐어.'),
+    endcard({
+      id: 'seoyeon_route_start', kicker: 'CHAEYEON ROUTE', title: '채연 루트',
+      text: '늘 선을 긋던 선배가, 처음으로 먼저 옆에 앉았다.',
+      next: '채연 루트 · 다음 업데이트에서 이어집니다',
+    }),
+  ]);
+
+  /* ---------------- 노멀 엔딩 ---------------- */
+  VN.label('normal_end', [
+    bgm('daily'),
+    bg('campus_path', 'black'),
+    place('6월', '종강'),
+    show('yujin', 'center', 'normal'),
+    Y('normal', '한 학기가 끝났다.'),
+    Y('normal', '방송국에선 기술부 정식 부원이 됐고, 설계는 B+를 받았다. 나은은 여전히 커피를 사 오고, 채연 선배는 여전히 아침 방송을 한다.'),
+    Y('smile', '…그런데 뭔가, 놓친 것 같은 기분.'),
+    endcard({
+      id: 'normal_end', kicker: 'NORMAL END', title: '종강',
+      text: '그렇게 1학기가 끝났다.',
+      next: '다른 선택으로 다시 플레이해 보세요',
+    }),
+  ]);
+})();
+
+</script>
+<script>VN.boot();</script>
+</body>
+</html>
